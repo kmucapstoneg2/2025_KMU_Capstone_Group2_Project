@@ -3,8 +3,8 @@ package com.outfit.ai.cloth_app.service;
 import com.outfit.ai.cloth_app.dto.MessageDto;
 import com.outfit.ai.cloth_app.repository.MessageTableRepository;
 import com.outfit.ai.cloth_app.repository.UserRepository;
-import com.outfit.ai.cloth_app.entity.tables.MessageTable;
-import com.outfit.ai.cloth_app.entity.tables.UserTable;
+import com.outfit.ai.cloth_app.entity.MessageTable;
+import com.outfit.ai.cloth_app.entity.UserTable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

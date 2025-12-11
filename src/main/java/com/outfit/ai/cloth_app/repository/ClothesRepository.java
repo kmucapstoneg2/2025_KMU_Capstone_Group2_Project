@@ -1,6 +1,6 @@
 package com.outfit.ai.cloth_app.repository;
 
-import com.outfit.ai.cloth_app.entity.tables.ClothesTable;
+import com.outfit.ai.cloth_app.entity.ClothesTable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

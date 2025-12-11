@@ -1,4 +1,4 @@
-package com.outfit.ai.cloth_app.entity.tables;
+package com.outfit.ai.cloth_app.entity;
 
 import jakarta.persistence.*;
 

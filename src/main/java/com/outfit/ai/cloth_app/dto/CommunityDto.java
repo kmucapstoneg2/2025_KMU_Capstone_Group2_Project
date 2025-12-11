@@ -1,6 +1,6 @@
 package com.outfit.ai.cloth_app.dto;
 
-import com.outfit.ai.cloth_app.entity.tables.OutfitCombination;
+import com.outfit.ai.cloth_app.entity.OutfitCombination;
 
 import java.util.ArrayList;
 import java.util.List;

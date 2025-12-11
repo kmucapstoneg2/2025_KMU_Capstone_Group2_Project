@@ -1,6 +1,5 @@
-package com.outfit.ai.cloth_app.entity.tables;
+package com.outfit.ai.cloth_app.entity;
 
-import com.outfit.ai.cloth_app.entity.WeatherId;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Type;

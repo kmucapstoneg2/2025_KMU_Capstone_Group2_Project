@@ -5,7 +5,7 @@ import com.outfit.ai.cloth_app.dto.request.SignUpRequestDto;
 import com.outfit.ai.cloth_app.dto.response.TokenResponseDto;
 import com.outfit.ai.cloth_app.repository.UserRepository;
 import com.outfit.ai.cloth_app.security.JwtTokenProvider;
-import com.outfit.ai.cloth_app.entity.tables.UserTable;
+import com.outfit.ai.cloth_app.entity.UserTable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

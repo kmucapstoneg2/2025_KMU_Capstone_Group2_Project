@@ -5,9 +5,9 @@ import com.outfit.ai.cloth_app.dto.CommunityDto;
 import com.outfit.ai.cloth_app.repository.CommunityInteractionsRepository;
 import com.outfit.ai.cloth_app.repository.OutfitCombinationRepository;
 import com.outfit.ai.cloth_app.repository.UserRepository;
-import com.outfit.ai.cloth_app.entity.tables.CommunityInteractions;
-import com.outfit.ai.cloth_app.entity.tables.OutfitCombination;
-import com.outfit.ai.cloth_app.entity.tables.UserTable;
+import com.outfit.ai.cloth_app.entity.CommunityInteractions;
+import com.outfit.ai.cloth_app.entity.OutfitCombination;
+import com.outfit.ai.cloth_app.entity.UserTable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

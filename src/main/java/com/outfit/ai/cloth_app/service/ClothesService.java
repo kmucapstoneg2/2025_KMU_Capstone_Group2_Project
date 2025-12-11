@@ -3,7 +3,7 @@ package com.outfit.ai.cloth_app.service;
 import com.outfit.ai.cloth_app.dto.request.ClothesCreateRequestDto;
 import com.outfit.ai.cloth_app.dto.response.ClothesItemDto;
 import com.outfit.ai.cloth_app.dto.response.ClothesListResponseDto;
-import com.outfit.ai.cloth_app.entity.tables.*;
+import com.outfit.ai.cloth_app.entity.*;
 import com.outfit.ai.cloth_app.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

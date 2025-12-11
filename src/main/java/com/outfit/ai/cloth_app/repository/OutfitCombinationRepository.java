@@ -1,7 +1,7 @@
 package com.outfit.ai.cloth_app.repository;
 
-import com.outfit.ai.cloth_app.entity.tables.OutfitCombination;
-import com.outfit.ai.cloth_app.entity.tables.UserTable;
+import com.outfit.ai.cloth_app.entity.OutfitCombination;
+import com.outfit.ai.cloth_app.entity.UserTable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 

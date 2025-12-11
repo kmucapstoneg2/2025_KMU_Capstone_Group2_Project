@@ -1,6 +1,6 @@
 package com.outfit.ai.cloth_app.repository;
 
-import com.outfit.ai.cloth_app.entity.tables.Weather;
+import com.outfit.ai.cloth_app.entity.Weather;
 import com.outfit.ai.cloth_app.entity.WeatherId;
 import org.springframework.data.jpa.repository.JpaRepository;
 

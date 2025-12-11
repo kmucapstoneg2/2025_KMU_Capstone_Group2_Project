@@ -1,7 +1,7 @@
 package com.outfit.ai.cloth_app.repository;
 
-import com.outfit.ai.cloth_app.entity.tables.UserCalendar;
-import com.outfit.ai.cloth_app.entity.tables.UserTable;
+import com.outfit.ai.cloth_app.entity.UserCalendar;
+import com.outfit.ai.cloth_app.entity.UserTable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

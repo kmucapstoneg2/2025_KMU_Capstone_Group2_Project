@@ -15,8 +15,8 @@ import com.outfit.ai.cloth_app.dto.response.DailyScheduleDto;
 import com.outfit.ai.cloth_app.dto.response.EventDetailDto;
 import com.outfit.ai.cloth_app.repository.UserCalendarRepository;
 import com.outfit.ai.cloth_app.repository.UserRepository;
-import com.outfit.ai.cloth_app.entity.tables.UserCalendar;
-import com.outfit.ai.cloth_app.entity.tables.UserTable;
+import com.outfit.ai.cloth_app.entity.UserCalendar;
+import com.outfit.ai.cloth_app.entity.UserTable;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;

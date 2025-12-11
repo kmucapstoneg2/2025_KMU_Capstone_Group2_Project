@@ -5,7 +5,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.outfit.ai.cloth_app.service.GoogleCalendarService;
-import com.outfit.ai.cloth_app.entity.tables.UserCalendar;
+import com.outfit.ai.cloth_app.entity.UserCalendar;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;

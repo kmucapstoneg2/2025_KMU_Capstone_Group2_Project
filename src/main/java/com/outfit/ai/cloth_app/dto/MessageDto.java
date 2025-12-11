@@ -1,6 +1,6 @@
 package com.outfit.ai.cloth_app.dto;
 
-import com.outfit.ai.cloth_app.entity.tables.MessageTable;
+import com.outfit.ai.cloth_app.entity.MessageTable;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;

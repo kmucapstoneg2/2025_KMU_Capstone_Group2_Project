@@ -1,6 +1,6 @@
 package com.outfit.ai.cloth_app.dto;
 
-import com.outfit.ai.cloth_app.entity.tables.CommunityInteractions;
+import com.outfit.ai.cloth_app.entity.CommunityInteractions;
 
 // 댓글 DTO
 public class CommentDto {
