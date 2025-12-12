@@ -1,0 +1,39 @@
+name: outfit_hub
+description: "flutter project"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'  # 이렇게 수정
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  uuid: ^4.5.1
+  image_picker: ^1.0.7
+  url_launcher: ^6.3.1
+  
+  # 상태 관리
+  provider: ^6.1.1
+  
+  # 로컬 DB
+  sqflite: ^2.3.0
+  path: ^1.8.3
+  
+  # 이미지 처리
+  flutter_image_compress: ^2.1.0
+  path_provider: ^2.1.1
+  
+  # 로딩 UI
+  shimmer: ^3.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
