@@ -10,6 +10,17 @@ services:
       timeout: 3s
       retries: 5
 
+  ai-inference-gateway:
+    build:
+      context: ./roboflow_api
+      dockerfile: Dockerfile
+    container_name: python-ai-gateway
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    restart: always
+
   cloth-app:
     build: .
     container_name: cloth-app
@@ -18,6 +29,8 @@ services:
     depends_on:
       redis-cache:
         condition: service_healthy
+      ai-inference-gateway:
+        condition: service_started
 
     env_file:
       - .env
@@ -25,3 +38,4 @@ services:
     environment:
       - spring.data.redis.host=redis-cache
       - spring.data.redis.port=6379
+      - AI_GATEWAY_URL=http://ai-inference-gateway:5000
