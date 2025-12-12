@@ -14,12 +14,9 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Deploy to local ubuntu
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_KEY }}
-          port: 5148  
-          source: "index.html"
-          target: "/var/www/html"
+      - name: Deploy index.html to web root
+        run: |
+          sudo cp index.html /var/www/html/index.html
+          sudo chown www-data:www-data /var/www/html/index.html
+
+
