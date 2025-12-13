@@ -2,85 +2,108 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>CI/CD Demo</title>
+  <title>CI/CD 자동 배포 데모</title>
+
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 40px;
-      background-color: #f9f9f9;
+      background-color: #f5f6f8;
       color: #333;
     }
+
     h1 {
       color: #2c3e50;
+      margin-bottom: 10px;
     }
-    .box {
-      background: white;
-      padding: 20px;
-      margin-top: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+
+    h2 {
+      color: #34495e;
+      margin-top: 0;
     }
-    .highlight {
+
+    .subtitle {
       color: #27ae60;
       font-weight: bold;
+      margin-bottom: 30px;
+    }
+
+    .box {
+      background: #ffffff;
+      padding: 25px;
+      margin-top: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    ul {
+      line-height: 1.9;
+    }
+
+    .time {
+      margin-top: 15px;
+      color: #555;
+      font-size: 0.95em;
     }
   </style>
 </head>
+
 <body>
 
-  <h1> 컴퓨터공학과 캡스톤 디자인</h1>  
-  <h2>🚀 CI/CD 자동 배포 데모 페이지</h2>
-  <p class="highlight">
-    GitHub Actions + Self-hosted Runner 기반으로 자동 배포 성공
+  <h1>컴퓨터공학과 캡스톤 디자인</h1>
+  <h1>🚀 CI/CD 자동 배포 데모 페이지</h1>
+
+  <p class="subtitle">
+    GitHub Actions + Self-hosted Runner 기반 자동 배포 성공
   </p>
 
   <div class="box">
-    <h2>프로젝트 설명</h2>
+    <h2>📌 프로젝트 설명</h2>
     <p>
-      이 페이지는 GitHub 저장소에 소스 코드를 push하면,
+      이 페이지는 GitHub 저장소에 소스 코드를 <b>push</b>하면,
       별도의 수동 작업 없이 웹 서버에 자동으로 배포되는
-      CI/CD 데모 페이지입니다.
-      캡스톤 CICD 데모 문구 수정 
+      CI/CD 파이프라인을 검증하기 위한 데모 페이지입니다.
     </p>
 
-    <p style="margin-top:10px; color:#555;">
+    <p class="time">
       최근 배포 시간: <span id="time"></span>
     </p>
   </div>
 
+  <div class="box">
+    <h2>⚙ CI/CD 파이프라인 구성</h2>
+    <ul>
+      <li>GitHub 저장소에 소스 코드 push</li>
+      <li>GitHub Actions Workflow 자동 트리거</li>
+      <li>Self-hosted Runner에서 Job 실행</li>
+      <li>웹 서버 디렉토리로 자동 배포 (/var/www/html)</li>
+    </ul>
+  </div>
+
+  <div class="box">
+    <h2>🛠 사용 기술 스택</h2>
+    <ul>
+      <li>GitHub Actions</li>
+      <li>Self-hosted Runner (Ubuntu)</li>
+      <li>Shell Script 기반 자동 배포</li>
+      <li>Apache Web Server</li>
+    </ul>
+  </div>
+
+  <div class="box">
+    <h2>✅ 자동 배포 검증</h2>
+    <p>
+      본 페이지는 소스 코드 수정 후 GitHub에 push 하면
+      수 초 내에 웹 서버 내용이 자동으로 변경되는 것을 통해
+      CI/CD 파이프라인이 정상적으로 동작함을 확인할 수 있습니다.
+    </p>
+  </div>
+
   <script>
-    document.getElementById("time").innerText = new Date().toLocaleString();
+    document.getElementById("time").innerText =
+      new Date().toLocaleString();
   </script>
 
 </body>
 </html>
 
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8" />
-  <title>CI/CD Demo</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 40px;
-      background-color: #f9f9f9;
-      color: #333;
-    }
-    h1 {
-      color: #2c3e50;
-    }
-    .box {
-      background: white;
-      padding: 20px;
-      margin-top: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    .highlight {
-      color: #27ae60;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
