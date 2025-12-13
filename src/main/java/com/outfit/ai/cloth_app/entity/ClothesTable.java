@@ -49,7 +49,7 @@ public class ClothesTable {
     @Column(name = "name", nullable = false, length = 255)
     private String clothName;
 
-    @Column(name = "image_url", nullable = false, columnDefinition = "text")
+    @Column(name = "image_url", columnDefinition = "text")
     private String imageUrl;
 
     @Column(name = "created_at", columnDefinition = "timestamptz default current_timestamp")

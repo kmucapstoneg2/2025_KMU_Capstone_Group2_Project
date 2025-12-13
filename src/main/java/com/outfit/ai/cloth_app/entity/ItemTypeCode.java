@@ -18,7 +18,7 @@ public class ItemTypeCode {
     @OneToMany(mappedBy = "itemTypeCode", cascade = CascadeType.ALL)
     private List<ClothesTable> clothesTableList = new ArrayList<>();
 
-    @Column(name = "item_type_name", nullable = false, length = 50)
+    @Column(name = "type_name", nullable = false, length = 50)
     private String itemTypeName;
 
     @Column(name = "created_at", columnDefinition = "timestamptz default current_timestamp")
