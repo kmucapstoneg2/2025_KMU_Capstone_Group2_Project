@@ -120,7 +120,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final imageUrl = widget.post['ai_gen_image_url'] as String?;
     final likeCount = widget.post['like_count'] as int? ?? 0;
     final jsonbData = widget.post['jsonb_data'] as Map<String, dynamic>?;
     final description = jsonbData?['description'] as String?;

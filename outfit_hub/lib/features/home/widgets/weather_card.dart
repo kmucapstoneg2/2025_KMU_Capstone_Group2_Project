@@ -1,13 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../../core/theme/theme.dart';
+import '../../../core/services/weather_service.dart';
 
 /// ============================================
 /// 날씨 카드
 /// ============================================
 
 class WeatherCard extends StatelessWidget {
-  final Map<String, dynamic>? weather;
+  final WeatherData? weather;
 
   const WeatherCard({
     super.key,
@@ -44,9 +45,8 @@ class WeatherCard extends StatelessWidget {
       );
     }
 
-    final weatherData = weather!['weather_data'] as Map<String, dynamic>;
-    final temperature = weatherData['temperature'] ?? 0;
-    final condition = weatherData['condition'] ?? '알 수 없음';
+    final temperature = weather!.temperature.round();
+    final condition = weather!.description;
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -66,25 +66,36 @@ class WeatherCard extends StatelessWidget {
             size: 32,
           ),
           const SizedBox(width: AppSpacing.md),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '$temperature°C',
-                style: const TextStyle(
-                  color: CupertinoColors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  weather!.location,
+                  style: const TextStyle(
+                    color: CupertinoColors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
-              Text(
-                condition,
-                style: const TextStyle(
-                  color: CupertinoColors.white,
-                  fontSize: 14,
+                const SizedBox(height: 4),
+                Text(
+                  '$temperature°C',
+                  style: const TextStyle(
+                    color: CupertinoColors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-            ],
+                Text(
+                  condition,
+                  style: const TextStyle(
+                    color: CupertinoColors.white,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

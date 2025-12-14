@@ -37,6 +37,9 @@ dependencies:
   # 로딩 UI
   shimmer: ^3.0.0
 
+  # JWT 토큰 만료 체크
+  jwt_decoder: ^2.0.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

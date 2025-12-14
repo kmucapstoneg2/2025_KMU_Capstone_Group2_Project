@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/theme.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../../core/error/error_handler.dart';
+import '../../../core/services/weather_service.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/notification_provider.dart';
 import '../../../main.dart';
@@ -24,7 +25,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Map<String, dynamic>? weather;
+  WeatherData? weather;
   List<Map<String, dynamic>> schedules = [];
   List<Map<String, dynamic>> recentOutfits = [];
   bool isLoading = true;
@@ -39,14 +40,18 @@ class _HomePageState extends State<HomePage> {
     setState(() => isLoading = true);
 
     try {
+      // AuthProvider에서 사용자 지역 정보 가져오기
+      final authProvider = context.read<AuthProvider>();
+      final location = authProvider.region ?? '서울';
+      
       final results = await Future.wait([
-        HomeLogic.getTodayWeather(),
+        HomeLogic.getTodayWeather(location),
         HomeLogic.getTodaySchedules(),
         HomeLogic.getRecentOutfits(limit: 3),
       ]);
 
       setState(() {
-        weather = results[0] as Map<String, dynamic>?;
+        weather = results[0] as WeatherData?;
         schedules = results[1] as List<Map<String, dynamic>>;
         recentOutfits = results[2] as List<Map<String, dynamic>>;
         isLoading = false;

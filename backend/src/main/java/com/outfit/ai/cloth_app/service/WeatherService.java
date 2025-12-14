@@ -15,12 +15,8 @@ public class WeatherService {
     }
 
     /**
-     * 🔹 Redis 캐시를 적용한 날씨 조회 메서드
-     *    - 캐시 만료 전까지 동일 지역은 API 재호출 안 함
-     *    - 캐시 미스 시 콘솔에 로그 출력
-     *    - API 에러 시에도 예외 던지지 않고 WeatherDto로 반환
+     * 날씨 조회 메서드 (Redis 캐시 임시 비활성화)
      */
-    @Cacheable(value = "weather", key = "#location")
     public WeatherDto getWeather(String location) {
         System.out.println("[WeatherService] 캐시 미스 → API 호출 시작: " + location);
 

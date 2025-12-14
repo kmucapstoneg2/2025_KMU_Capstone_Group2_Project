@@ -28,7 +28,6 @@ class PostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imageUrl = post['ai_gen_image_url'] as String?;
     final likeCount = post['like_count'] as int? ?? 0;
     final createdAt = post['created_at'] as String?;
     final jsonbData = post['jsonb_data'] as Map<String, dynamic>?;

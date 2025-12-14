@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'data/storage.dart';
-import 'data/dummy/dummy_data_loader.dart';
 import 'app.dart';
 import 'main_tab_view.dart';
 

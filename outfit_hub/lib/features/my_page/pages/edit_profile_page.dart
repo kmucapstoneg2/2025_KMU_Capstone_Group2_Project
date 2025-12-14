@@ -105,6 +105,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
       // AuthProvider의 username 업데이트
       await authProvider.updateUsername(_usernameController.text.trim());
+      
+      // AuthProvider의 region 업데이트 (날씨 카드 갱신 위해)
+      await authProvider.updateRegion(_selectedRegion);
 
       // UserProvider의 username도 함께 업데이트 (홈 인사말 동기화)
       await context.read<UserProvider>().updateUsername(_usernameController.text.trim());

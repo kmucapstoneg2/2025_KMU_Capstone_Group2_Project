@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../core/services/auth_service.dart';
 import '../core/services/api_service.dart';
 import '../data/storage.dart';
+import '../core/utils/jwt_helper.dart';
 
 /// ============================================
 /// 인증 Provider
@@ -10,6 +11,71 @@ import '../data/storage.dart';
 /// ============================================
 
 class AuthProvider extends ChangeNotifier {
+      // 자동 로그인용 이메일/비밀번호(암호화 필요, 1차 평문 저장)
+      static const String _keyLoginEmail = 'auth_login_email';
+      static const String _keyLoginPassword = 'auth_login_password';
+      String? _loginEmail;
+      String? _loginPassword;
+      /// 자동 로그인 정보 저장
+      Future<void> _saveLoginInfo(String email, String password) async {
+        try {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString(_keyLoginEmail, email);
+          await prefs.setString(_keyLoginPassword, password);
+          _loginEmail = email;
+          _loginPassword = password;
+        } catch (e) {
+          print('로그인 정보 저장 실패: $e');
+        }
+      }
+
+      /// 자동 로그인 정보 로드
+      Future<void> _loadLoginInfo() async {
+        try {
+          final prefs = await SharedPreferences.getInstance();
+          _loginEmail = prefs.getString(_keyLoginEmail);
+          _loginPassword = prefs.getString(_keyLoginPassword);
+        } catch (e) {
+          print('로그인 정보 로드 실패: $e');
+        }
+      }
+
+      /// 자동 로그인 정보 삭제
+      Future<void> _clearLoginInfo() async {
+        try {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.remove(_keyLoginEmail);
+          await prefs.remove(_keyLoginPassword);
+          _loginEmail = null;
+          _loginPassword = null;
+        } catch (e) {
+          print('로그인 정보 삭제 실패: $e');
+        }
+      }
+    /// accessToken 만료 여부 반환
+    bool get isTokenExpired {
+      if (_accessToken == null) return true;
+      return JwtHelper.isExpired(_accessToken!);
+    }
+
+    /// accessToken 만료 시 자동 재로그인 시도 (refresh 미구현 시)
+    Future<void> checkAndHandleToken() async {
+      if (isTokenExpired) {
+        // 자동 로그인 정보가 있으면 재로그인 시도
+        await _loadLoginInfo();
+        if (_loginEmail != null && _loginPassword != null) {
+          try {
+            await login(email: _loginEmail!, password: _loginPassword!);
+            print('만료 토큰 → 자동 재로그인 성공');
+          } catch (e) {
+            print('만료 토큰 → 자동 재로그인 실패: $e');
+            await logout();
+          }
+        } else {
+          await logout();
+        }
+      }
+    }
   static const String _keyIsLoggedIn = 'auth_is_logged_in';
   static const String _keyIsGuest = 'auth_is_guest';
   static const String _keyUserId = 'auth_user_id';
@@ -17,6 +83,7 @@ class AuthProvider extends ChangeNotifier {
   static const String _keyEmail = 'auth_email';
   static const String _keyAccessToken = 'auth_access_token';
   static const String _keyRefreshToken = 'auth_refresh_token';
+  static const String _keyRegion = 'auth_region';
 
   bool _isLoggedIn = false;
   bool _isGuest = false;
@@ -28,6 +95,7 @@ class AuthProvider extends ChangeNotifier {
   String? _email;
   String? _accessToken;
   String? _refreshToken;
+  String? _region;
 
   // Getters
   bool get isLoggedIn => _isLoggedIn;
@@ -38,11 +106,13 @@ class AuthProvider extends ChangeNotifier {
   String? get username => _username;
   String? get email => _email;
   String? get accessToken => _accessToken;
+  String? get region => _region;
   bool get isAuthenticated => _isLoggedIn || _isGuest;
 
   /// 초기화 - 저장된 인증 상태 복원
   Future<void> init() async {
     await _loadAuthState();
+    await checkAndHandleToken();
   }
 
   /// 저장된 인증 상태 로드
@@ -57,6 +127,8 @@ class AuthProvider extends ChangeNotifier {
       _email = prefs.getString(_keyEmail);
       _accessToken = prefs.getString(_keyAccessToken);
       _refreshToken = prefs.getString(_keyRefreshToken);
+      _region = prefs.getString(_keyRegion);
+      await _loadLoginInfo();
       
       notifyListeners();
     } catch (e) {
@@ -101,6 +173,12 @@ class AuthProvider extends ChangeNotifier {
       } else {
         await prefs.remove(_keyRefreshToken);
       }
+      
+      if (_region != null) {
+        await prefs.setString(_keyRegion, _region!);
+      } else {
+        await prefs.remove(_keyRegion);
+      }
     } catch (e) {
       print('인증 상태 저장 실패: $e');
     }
@@ -118,6 +196,8 @@ class AuthProvider extends ChangeNotifier {
       await prefs.remove(_keyEmail);
       await prefs.remove(_keyAccessToken);
       await prefs.remove(_keyRefreshToken);
+      await prefs.remove(_keyRegion);
+      await _clearLoginInfo();
     } catch (e) {
       print('인증 상태 초기화 실패: $e');
     }
@@ -174,6 +254,8 @@ class AuthProvider extends ChangeNotifier {
       _refreshToken = response.refreshToken;
 
       await _saveAuthState();
+      await _saveLoginInfo(email, password);
+      await checkAndHandleToken();
       
       // UserProvider(로컬 DB)의 username도 업데이트하여 홈 화면과 동기화
       try {
@@ -242,6 +324,13 @@ class AuthProvider extends ChangeNotifier {
   /// 사용자명 업데이트
   Future<void> updateUsername(String newUsername) async {
     _username = newUsername;
+    await _saveAuthState();
+    notifyListeners();
+  }
+
+  /// region 업데이트 (프로필 수정 시)
+  Future<void> updateRegion(String newRegion) async {
+    _region = newRegion;
     await _saveAuthState();
     notifyListeners();
   }

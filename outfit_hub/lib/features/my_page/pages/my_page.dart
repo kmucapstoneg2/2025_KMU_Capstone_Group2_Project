@@ -54,6 +54,12 @@ class _MyPageState extends State<MyPage> {
         final profile = await ProfileService.getProfile(
           token: authProvider.accessToken!,
         );
+        
+        // AuthProvider에 region 저장
+        if (profile.region != null) {
+          await authProvider.updateRegion(profile.region!);
+        }
+        
         setState(() {
           user = {
             'username': profile.username,

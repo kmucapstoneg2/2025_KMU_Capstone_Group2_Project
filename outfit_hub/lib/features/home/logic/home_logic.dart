@@ -1,18 +1,31 @@
 import '../../../data/storage.dart';
 import '../../../core/error/exceptions.dart';
 import '../../../core/utils/date_helper.dart';
+import '../../../core/services/weather_service.dart';
 
 /// ============================================
 /// 홈 비즈니스 로직
 /// ============================================
 
 class HomeLogic {
-  /// 오늘 날씨 조회
-  static Future<Map<String, dynamic>?> getTodayWeather() async {
+  /// 오늘 날씨 조회 (서버 API 호출)
+  static Future<WeatherData?> getTodayWeather(String location) async {
     try {
-      return await Storage.getTodayWeather();
+      return await WeatherService.getWeather(location);
     } catch (e) {
-      throw StorageException('날씨 정보를 불러오는데 실패했습니다');
+      print('날씨 조회 실패: $e');
+      return null;
+    }
+  }
+
+  /// 특정 날짜/지역의 날씨 조회
+  static Future<WeatherData?> getWeatherForDate(String location, DateTime date) async {
+    try {
+      // 현재는 날짜와 관계없이 동일한 API 호출 (추후 확장 가능)
+      return await WeatherService.getWeather(location);
+    } catch (e) {
+      print('날씨 조회 실패: $e');
+      return null;
     }
   }
 

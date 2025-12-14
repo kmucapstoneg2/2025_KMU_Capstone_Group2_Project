@@ -39,7 +39,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**", "/api/weather/**").permitAll()
+                        .requestMatchers("/api/v1/auth/**", "/api/weather/**", "/weather/**").permitAll()
                         .requestMatchers("/").permitAll()
                         .requestMatchers("/calendar/**").authenticated()
                         .anyRequest().authenticated()

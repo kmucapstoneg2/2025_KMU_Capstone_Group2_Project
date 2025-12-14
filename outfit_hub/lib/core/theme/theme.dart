@@ -1,9 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'colors.dart';
-import 'spacing.dart';
-import 'text_styles.dart';
-import 'shadows.dart';
-
 export 'colors.dart';
 export 'spacing.dart';
 export 'text_styles.dart';
