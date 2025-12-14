@@ -3,7 +3,7 @@
 /// ============================================
 
 class DatabaseSchema {
-  static const int version = 1;
+  static const int version = 2;
   static const String databaseName = 'outfit_hub.db';
 
   // ========== 테이블 생성 SQL ==========
@@ -169,6 +169,21 @@ class DatabaseSchema {
     )
   ''';
 
+  /// 인증 상태 테이블
+  static const String createAuthStateTable = '''
+    CREATE TABLE auth_state (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      is_logged_in INTEGER NOT NULL DEFAULT 0,
+      is_guest INTEGER NOT NULL DEFAULT 0,
+      user_id TEXT,
+      username TEXT,
+      email TEXT,
+      access_token TEXT,
+      refresh_token TEXT,
+      created_at TEXT
+    )
+  ''';
+
   // ========== 인덱스 ==========
 
   static const String createClothesUserIdIndex = '''
@@ -210,6 +225,7 @@ class DatabaseSchema {
         createWishlistTable,
         createCommunityInteractionsTable,
         createScheduleTable,
+        createAuthStateTable,
 
         // 인덱스
         createClothesUserIdIndex,

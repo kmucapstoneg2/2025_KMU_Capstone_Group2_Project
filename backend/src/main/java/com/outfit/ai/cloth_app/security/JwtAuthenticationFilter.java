@@ -33,7 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if(jwt != null && jwtTokenProvider.validateToken(jwt)) {
                 UUID userId = jwtTokenProvider.getUserIdFromToken(jwt);
                 Authentication authentication = new UsernamePasswordAuthenticationToken(
-                        userId,
+                        userId.toString(),
                         null,
                         Collections.emptyList()
                 );

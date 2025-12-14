@@ -26,12 +26,20 @@ class DatabaseHelper {
       path,
       version: DatabaseSchema.version,
       onCreate: _createDB,
+      onUpgrade: _upgradeDB,
       onConfigure: _onConfigure,
     );
   }
 
   Future<void> _onConfigure(Database db) async {
     await db.execute('PRAGMA foreign_keys = ON');
+  }
+
+  Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    // v1 -> v2: auth_state 테이블 추가
+    if (oldVersion < 2) {
+      await db.execute(DatabaseSchema.createAuthStateTable);
+    }
   }
 
   Future<void> _createDB(Database db, int version) async {

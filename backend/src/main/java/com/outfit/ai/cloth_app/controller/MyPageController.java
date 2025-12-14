@@ -1,12 +1,11 @@
 package com.outfit.ai.cloth_app.controller;
 
+import com.outfit.ai.cloth_app.dto.request.ProfileUpdateRequestDto;
 import com.outfit.ai.cloth_app.dto.response.MyPageProfileResponseDto;
 import com.outfit.ai.cloth_app.service.MyPageService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -26,6 +25,18 @@ public class MyPageController {
         UUID userId = UUID.fromString(userIdString);
 
         MyPageProfileResponseDto response = myPageService.getMyProfile(userId);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // 프로필 수정
+    @PutMapping("/profile")
+    public ResponseEntity<MyPageProfileResponseDto> updateProfile(
+            @AuthenticationPrincipal String userIdString,
+            @RequestBody ProfileUpdateRequestDto request) {
+        UUID userId = UUID.fromString(userIdString);
+
+        MyPageProfileResponseDto response = myPageService.updateProfile(userId, request);
 
         return ResponseEntity.ok(response);
     }

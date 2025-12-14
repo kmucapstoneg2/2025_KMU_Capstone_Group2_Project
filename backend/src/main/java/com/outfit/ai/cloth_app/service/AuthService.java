@@ -42,6 +42,7 @@ public class AuthService {
         newUser.setUsername(request.getUsername());
         newUser.setEmail(request.getEmail());
         newUser.setPasswordHash(hashedPassword);
+        newUser.setRegion(request.getRegion() != null ? request.getRegion() : "서울");
 
         userRepository.save(newUser);
     }
