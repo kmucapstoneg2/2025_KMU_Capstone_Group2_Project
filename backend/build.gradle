@@ -1,0 +1,90 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.5.6'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.outfit.ai.cloth_app' // 팀원의 그룹으로 통합
+version = '0.0.1-SNAPSHOT'
+description = 'project_1009'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+	tasks.withType(JavaCompile) {
+		options.compilerArgs.add('--enable-preview')
+	}
+}
+
+repositories {
+	mavenCentral()
+	google() // Google 라이브러리를 위해 추가 (유지)
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+dependencies {
+	// Spring Boot Starters (Web/Validation/Scheduler/Cache/Redis)
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-quartz'
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+	// DB Driver
+	runtimeOnly 'org.postgresql:postgresql' // 팀원의 버전 관리 방식 채택
+	runtimeOnly 'com.h2database:h2' // ⭐ H2 DB 추가 (테스트용)
+
+	// Vector, Hibernate, and Utility Dependencies
+	implementation 'org.hibernate.orm:hibernate-vector:6.4.0.Final'
+	implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.11.0'
+
+	// AWS S3 and Spring Cloud AWS (팀원의 자세한 목록 채택)
+	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.721'
+	implementation 'io.awspring.cloud:spring-cloud-starter-aws:2.4.4'
+	implementation 'io.awspring.cloud:spring-cloud-aws-context:2.4.4'
+
+	// JWT (JJWT) Dependencies
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+	// Google APIs (⭐최신 버전으로 통합 및 정리)
+	implementation 'com.google.auth:google-auth-library-oauth2-http:1.23.0'
+	implementation 'com.google.http-client:google-http-client-jackson2:1.44.2'
+	implementation 'com.google.code.gson:gson'
+	implementation 'com.google.apis:google-api-services-calendar:v3-rev20250115-2.0.0' // 당신의 최신 Calendar API
+
+	// Google Calendar API Client Library (팀원의 코드가 중복되므로 제거)
+	// implementation 'com.google.api-client:google-api-client:2.4.0'
+	// implementation 'com.google.oauth-client:google-oauth-client-jetty:1.34.1'
+	// implementation 'com.google.apis:google-api-services-calendar:v3-rev20220715-2.0.0'
+
+	// DevTool
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+	// OAuth2
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.security:spring-security-oauth2-client'
+
+	// Test Dependencies
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'io.projectreactor:reactor-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}

@@ -1,0 +1,41 @@
+services:
+  redis-cache:
+    image: redis:7.2-alpine
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  ai-inference-gateway:
+    build:
+      context: ./roboflow_api
+      dockerfile: Dockerfile
+    container_name: python-ai-gateway
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    restart: always
+
+  cloth-app:
+    build: .
+    container_name: cloth-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      redis-cache:
+        condition: service_healthy
+      ai-inference-gateway:
+        condition: service_started
+
+    env_file:
+      - .env
+
+    environment:
+      - spring.data.redis.host=redis-cache
+      - spring.data.redis.port=6379
+      - AI_GATEWAY_URL=http://ai-inference-gateway:5000
