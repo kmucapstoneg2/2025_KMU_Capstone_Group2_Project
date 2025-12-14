@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/services/auth_service.dart';
 import '../core/services/api_service.dart';
+import '../data/storage.dart';
 
 /// ============================================
 /// 인증 Provider
@@ -173,6 +174,13 @@ class AuthProvider extends ChangeNotifier {
       _refreshToken = response.refreshToken;
 
       await _saveAuthState();
+      
+      // UserProvider(로컬 DB)의 username도 업데이트하여 홈 화면과 동기화
+      try {
+        await Storage.updateUser({'username': response.username});
+      } catch (e) {
+        print('UserProvider username 업데이트 실패: $e');
+      }
     } on ApiException catch (e) {
       _error = e.message;
       rethrow;

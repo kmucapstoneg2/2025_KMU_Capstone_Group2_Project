@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../../core/core.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../providers/user_provider.dart';
 import 'package:image/image.dart' as img;
 
 /// ============================================
@@ -105,12 +106,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
       // AuthProvider의 username 업데이트
       await authProvider.updateUsername(_usernameController.text.trim());
 
+      // UserProvider의 username도 함께 업데이트 (홈 인사말 동기화)
+      await context.read<UserProvider>().updateUsername(_usernameController.text.trim());
+
       if (mounted) {
-        await DialogHelper.showSuccess(
-          context,
-          title: '프로필 수정 완료',
-          content: '프로필이 성공적으로 수정되었습니다.',
-        );
         Navigator.pop(context, true); // true를 반환하여 새로고침 필요함을 알림
       }
     } on ApiException catch (e) {

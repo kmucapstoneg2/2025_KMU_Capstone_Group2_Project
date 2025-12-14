@@ -83,18 +83,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Future<void> _handleGuestLogin() async {
-    setState(() => _isLoading = true);
 
-    try {
-      await context.read<AuthProvider>().loginAsGuest();
-      // AuthWrapper가 상태 변경을 감지하여 자동으로 화면 전환
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -220,74 +209,6 @@ class _LoginPageState extends State<LoginPage> {
                   style: TextStyle(
                     fontSize: 14,
                     color: AppColors.primary,
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              
-              // 구분선
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 1,
-                      color: AppColors.border,
-                    ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                    child: Text(
-                      '또는',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      height: 1,
-                      color: AppColors.border,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              
-              // 게스트 로그인 버튼
-              CupertinoButton(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                color: AppColors.greyLight,
-                onPressed: _handleGuestLogin,
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      CupertinoIcons.person,
-                      size: 20,
-                      color: AppColors.textPrimary,
-                    ),
-                    SizedBox(width: AppSpacing.sm),
-                    Text(
-                      '게스트로 시작하기',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              
-              // 게스트 안내 문구
-              const Center(
-                child: Text(
-                  '게스트 모드에서는 일부 기능이 제한될 수 있습니다',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
                   ),
                 ),
               ),

@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/theme.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../../core/error/error_handler.dart';
-import '../../../providers/user_provider.dart';
+import '../../../providers/auth_provider.dart';
 import '../../../providers/notification_provider.dart';
 import '../../../main.dart';
 import '../logic/logic.dart';
@@ -172,9 +172,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildDateHeader() {
-    return Consumer<UserProvider>(
-      builder: (context, userProvider, child) {
-        final username = userProvider.username;
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        final username = authProvider.username ?? '사용자';
         final now = DateTime.now();
         final dateStr = '${now.year}년 ${now.month}월 ${now.day}일';
 
