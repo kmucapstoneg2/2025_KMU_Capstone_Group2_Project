@@ -33,7 +33,8 @@ public class CommunityInteractions {
     private List<CommunityInteractions> children = new ArrayList<>();
 
     // 활동 종류(게시글, 댓글, 좋아요 등)
-    @Column(name = "interaction_type", nullable = false, unique = true, length = 255)
+    // unique = false: 동일한 타입의 활동이 여러 개 있을 수 있음 (여러 댓글, 여러 좋아요 등)
+    @Column(name = "interaction_type", nullable = false, length = 255)
     private String interactionType;
 
     // 게시글, 댓글 내용

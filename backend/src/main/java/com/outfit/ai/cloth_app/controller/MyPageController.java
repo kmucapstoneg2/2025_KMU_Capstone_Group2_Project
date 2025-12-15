@@ -6,7 +6,10 @@ import com.outfit.ai.cloth_app.service.MyPageService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 // 마이페이지 컨트롤러
@@ -25,6 +28,21 @@ public class MyPageController {
         UUID userId = UUID.fromString(userIdString);
 
         MyPageProfileResponseDto response = myPageService.getMyProfile(userId);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // 프로필 이미지 업로드 (S3)
+    @PostMapping("/profile/image")
+    public ResponseEntity<Map<String, String>> uploadProfileImage(
+            @AuthenticationPrincipal String userIdString,
+            @RequestPart("image") MultipartFile imageFile) {
+        UUID userId = UUID.fromString(userIdString);
+
+        String imageUrl = myPageService.uploadProfileImage(userId, imageFile);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("imageUrl", imageUrl);
 
         return ResponseEntity.ok(response);
     }

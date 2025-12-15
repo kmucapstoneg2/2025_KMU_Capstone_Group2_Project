@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'api_service.dart';
 
 /// ============================================
@@ -12,6 +13,24 @@ class ProfileService {
     final response = await ApiService.get('/mypage/profile', token: token, debug: true);
     print('[ProfileService] Raw response: $response');
     return ProfileResponse.fromJson(response);
+  }
+
+  /// 프로필 이미지 업로드 (S3)
+  /// POST /api/v1/mypage/profile/image
+  static Future<String> uploadProfileImage({
+    required String token,
+    required File imageFile,
+  }) async {
+    print('[ProfileService] uploadProfileImage called');
+    final response = await ApiService.postMultipart(
+      '/mypage/profile/image',
+      data: {},
+      file: imageFile,
+      fileFieldName: 'image',
+      token: token,
+    );
+    print('[ProfileService] Upload response: $response');
+    return response['imageUrl'] as String;
   }
 
   /// 프로필 수정

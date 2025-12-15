@@ -9,6 +9,7 @@ import '../../../core/utils/image_helper.dart';
 import '../../../core/utils/dialog_helper.dart';
 import '../../../core/error/error_handler.dart';
 import '../../../providers/closet_provider.dart';
+import '../../../providers/auth_provider.dart';
 import '../logic/logic.dart';
 import '../widgets/widgets.dart';
 
@@ -67,65 +68,54 @@ class _ClosetAddPageState extends State<ClosetAddPage> {
   }
 
   Future<void> _submit() async {
-    final provider = context.read<ClosetProvider>();
-
-    final categoryId = selectedCategory != null
-        ? ClosetLogic.findCodeId(provider.categories, selectedCategory!, 'category')
-        : null;
-    final colorId = selectedColor != null
-        ? ClosetLogic.findCodeId(provider.colors, selectedColor!, 'color')
-        : null;
-    final materialId = selectedMaterial != null
-        ? ClosetLogic.findCodeId(provider.materials, selectedMaterial!, 'material')
-        : null;
-
-    final validationError = ClosetValidationLogic.validateAddCloth(
-      name: nameController.text,
-      categoryId: categoryId,
-      colorId: colorId,
-      materialId: materialId,
-      price: null, // 가격 제거
-    );
-
-    if (validationError != null) {
-      await DialogHelper.showAlert(
-        context,
-        title: '알림',
-        content: validationError,
-      );
+    // 필수 항목 검증
+    if (nameController.text.trim().isEmpty) {
+      await DialogHelper.showAlert(context, title: '알림', content: '옷 이름을 입력해주세요');
+      return;
+    }
+    if (selectedCategory == null) {
+      await DialogHelper.showAlert(context, title: '알림', content: '카테고리를 선택해주세요');
+      return;
+    }
+    if (selectedColor == null) {
+      await DialogHelper.showAlert(context, title: '알림', content: '색상을 선택해주세요');
+      return;
+    }
+    if (selectedMaterial == null) {
+      await DialogHelper.showAlert(context, title: '알림', content: '소재를 선택해주세요');
+      return;
+    }
+    if (selectedImage == null) {
+      await DialogHelper.showAlert(context, title: '알림', content: '사진을 선택해주세요');
       return;
     }
 
     DialogHelper.showLoading(context);
 
     try {
-      final seasonId = selectedSeason != null
-          ? ClosetLogic.findCodeId(provider.seasons, selectedSeason!, 'season')
-          : null;
-      final styleId = selectedStyle != null
-          ? ClosetLogic.findCodeId(provider.styles, selectedStyle!, 'style')
-          : null;
-      final typeId = selectedType != null
-          ? ClosetLogic.findCodeId(provider.types, selectedType!, 'type')
-          : null;
+      // AuthProvider에서 토큰 가져오기
+      final authProvider = context.read<AuthProvider>();
+      final token = authProvider.accessToken;
+      
+      if (token == null) {
+        throw Exception('로그인이 필요합니다');
+      }
 
       await ClosetLogic.addCloth(
-        categoryId: categoryId!,
-        colorId: colorId!,
-        materialId: materialId!,
+        token: token,
+        categoryName: selectedCategory!,
+        colorName: selectedColor!,
+        materialName: selectedMaterial!,
         name: nameController.text.trim(),
-        seasonId: seasonId,
-        styleId: styleId,
-        typeId: typeId,
-        price: null, // 가격 제거
-        imageUrl: selectedImage?.path,
-        purchaseLink: linkController.text.trim().isNotEmpty
-            ? linkController.text.trim()
-            : null,
+        seasonName: selectedSeason,
+        styleName: selectedStyle,
+        itemTypeName: selectedType,
+        imageFile: File(selectedImage!.path),
       );
 
       if (mounted) {
-        await provider.loadClothes();
+        final provider = context.read<ClosetProvider>();
+        await provider.loadClothes(token);
         DialogHelper.hideLoading(context);
         
         await DialogHelper.showSuccess(

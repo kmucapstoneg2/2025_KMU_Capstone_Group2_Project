@@ -52,9 +52,17 @@ public class MessageController {
         // 2. 메시지 수신자에게 실시간 알림 전송 (NoticeService 사용)
         // DTO를 생성하여 NoticeService에 전달합니다.
         UUID receiverId = sentMessage.getReceiverId();
-
-        // content는 메시지 내용을 50자 이내로 요약
-        String briefContent = sentMessage.getContent().substring(0, Math.min(sentMessage.getContent().length(), 50)) + "...";
+        
+        // receiverId null 체크 - 수신자 정보가 없으면 알림 전송 생략
+        if (receiverId == null) {
+            return ResponseEntity.ok(sentMessage);
+        }
+        
+        // content null 체크 후 요약 생성
+        String briefContent = "";
+        if (sentMessage.getContent() != null) {
+            briefContent = sentMessage.getContent().substring(0, Math.min(sentMessage.getContent().length(), 50)) + "...";
+        }
 
         // 알림 DTO 생성 (예시)
         NotificationDto notification = new NotificationDto(

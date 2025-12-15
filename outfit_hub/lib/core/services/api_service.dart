@@ -3,14 +3,30 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 /// ============================================
-/// API 서비스 - 백엔드 통신
+/// API 서비스 - 백엔드 서버와의 HTTP 통신 담당
 /// ============================================
+/// 
+/// 주요 기능:
+/// - POST/GET/PUT 요청 처리
+/// - Multipart 파일 업로드 (옷 이미지 등)
+/// - JWT 토큰 기반 인증 헤더 자동 추가
+/// - 에러 응답 처리 및 ApiException 변환
+/// 
+/// 사용 예시:
+/// ```dart
+/// // 로그인
+/// final response = await ApiService.post('/auth/login', {'email': '...', 'password': '...'});
+/// 
+/// // 인증된 요청
+/// final clothes = await ApiService.get('/wardrobe/clothes', token: accessToken);
+/// ```
 
 class ApiService {
-  // TODO: 실제 서버 URL로 변경 (현재 로컬 개발용)
-  // iOS 시뮬레이터: localhost
-  // Android 에뮬레이터: 10.0.2.2
-  // 실제 기기: 서버 IP 또는 도메인
+  // 백엔드 서버 URL
+  // TODO: 실제 서버 URL로 변경 필요
+  // - iOS 시뮬레이터: localhost
+  // - Android 에뮬레이터: 10.0.2.2
+  // - 실제 기기: 서버 IP 또는 도메인
   static const String baseUrl = 'http://localhost:8080/api/v1';
   
   static final http.Client _client = http.Client();

@@ -10,7 +10,17 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
-// 옷 컨트롤러
+/**
+ * 옷장 컨트롤러 - 옷 등록/조회 API
+ * 
+ * 엔드포인트:
+ * - POST /api/v1/wardrobe/clothes : 옷 등록 (이미지 업로드 포함)
+ * - GET  /api/v1/wardrobe/clothes : 사용자의 옷 목록 조회
+ * 
+ * 인증: Bearer Token 필수 (Authorization 헤더)
+ * Flutter에서 ClothesService를 통해 호출됨
+ * @see ClothesService
+ */
 @RestController
 @RequestMapping("/api/v1/wardrobe")
 public class ClothesController {

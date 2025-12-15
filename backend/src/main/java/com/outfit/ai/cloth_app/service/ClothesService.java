@@ -12,7 +12,19 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.UUID;
 
-// 옷 등록, 불러오기 서비스
+/**
+ * 옷 등록/조회 서비스
+ * 
+ * 주요 기능:
+ * - createClothes: 옷 등록 (S3에 이미지 업로드 후 DB 저장)
+ * - getClothesList: 사용자별 옷 목록 조회
+ * 
+ * 의존성:
+ * - S3FileUploader: 이미지 업로드
+ * - 각 코드 테이블 Repository: 카테고리, 색상, 소재 등
+ * 
+ * @see ClothesController
+ */
 @Service
 public class ClothesService {
     private final ClothesRepository clothesRepository;

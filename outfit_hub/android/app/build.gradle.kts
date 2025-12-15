@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.example.outfit_hub"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "26.1.10909125"  // 안정적인 NDK 버전으로 고정
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

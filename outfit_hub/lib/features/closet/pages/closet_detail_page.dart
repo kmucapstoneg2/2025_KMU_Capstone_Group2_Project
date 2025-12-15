@@ -8,6 +8,7 @@ import '../../../core/widgets/widgets.dart';
 import '../../../core/utils/image_helper.dart';
 import '../../../core/utils/dialog_helper.dart';
 import '../../../core/error/error_handler.dart';
+import '../../../providers/auth_provider.dart';
 import '../../../providers/closet_provider.dart';
 import '../logic/logic.dart';
 import '../widgets/widgets.dart';
@@ -174,7 +175,8 @@ class _ClosetDetailPageState extends State<ClosetDetailPage> {
       }
 
       await ClosetLogic.updateCloth(widget.item['cloth_id'], updates);
-      await provider.loadClothes();
+      final token = context.read<AuthProvider>().accessToken ?? '';
+      await provider.loadClothes(token);
 
       if (mounted) {
         DialogHelper.hideLoading(context);
@@ -205,7 +207,8 @@ class _ClosetDetailPageState extends State<ClosetDetailPage> {
 
     try {
       await ClosetLogic.deleteCloth(widget.item['cloth_id']);
-      await context.read<ClosetProvider>().loadClothes();
+      final token = context.read<AuthProvider>().accessToken ?? '';
+      await context.read<ClosetProvider>().loadClothes(token);
 
       if (mounted) {
         DialogHelper.hideLoading(context);

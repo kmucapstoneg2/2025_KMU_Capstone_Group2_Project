@@ -17,7 +17,21 @@ import java.nio.file.AccessDeniedException;
 import java.util.Collections;
 import java.util.UUID;
 
-// JWT인증 필터
+/**
+ * JWT 인증 필터 - 모든 요청에 대해 JWT 토큰을 검증
+ * 
+ * 동작 방식:
+ * 1. Authorization 헤더에서 "Bearer {token}" 형식의 토큰 추출
+ * 2. JwtTokenProvider를 통해 토큰 유효성 검증
+ * 3. 유효한 경우 SecurityContext에 인증 정보 설정
+ * 
+ * 예외 경로:
+ * - /oauth2/** : OAuth2 로그인
+ * - /login/oauth2/** : OAuth2 콜백
+ * 
+ * @see JwtTokenProvider
+ * @see SecurityConfig
+ */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
@@ -27,6 +41,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+        String path = request.getRequestURI();
+        
+        // OAuth2 경로는 JWT 필터를 건너뜁니다
+        if (path.startsWith("/oauth2/") || path.startsWith("/login/oauth2/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        
         try {
             String jwt = getJwtFromRequest(request);
 
@@ -47,9 +69,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     // 요청에서 JWT 토큰 받기
+    // Authorization 헤더에서 "Bearer " 접두사를 제거하고 토큰만 추출
     private String getJwtFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
-        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer")) {
+        // "Bearer " (공백 포함 7자)로 시작하는지 확인
+        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
         return null;

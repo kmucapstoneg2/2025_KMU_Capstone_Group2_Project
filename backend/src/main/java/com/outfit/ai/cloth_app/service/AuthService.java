@@ -12,7 +12,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-// JWT 통한 인증 서비스
+/**
+ * 인증 서비스 - JWT 토큰 기반 인증 처리
+ * 
+ * 주요 기능:
+ * - signUp: 회원가입 (비밀번호 BCrypt 암호화)
+ * - login: 로그인 (액세스/리프레시 토큰 발급)
+ * - getUserIdFromAuthHeader: Authorization 헤더에서 사용자 ID 추출
+ * 
+ * 의존성:
+ * - JwtTokenProvider: 토큰 생성/검증
+ * - PasswordEncoder: 비밀번호 암호화 (BCrypt)
+ * 
+ * @see JwtTokenProvider
+ * @see SecurityConfig
+ */
 @Service
 public class AuthService {
     private final UserRepository userRepository;

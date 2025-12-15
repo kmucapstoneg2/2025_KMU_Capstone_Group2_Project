@@ -1,41 +1,47 @@
+import 'dart:io';
 import '../../../data/storage.dart';
 import '../../../core/error/exceptions.dart';
+import '../../../core/services/clothes_service.dart';
 
 /// ============================================
 /// 옷장 비즈니스 로직
 /// ============================================
 
 class ClosetLogic {
-  /// 옷 추가
-  static Future<String> addCloth({
-    required String categoryId,
-    required String colorId,
-    required String materialId,
+  /// 옷 추가 (Backend API 사용)
+  static Future<void> addCloth({
+    required String token,
+    required String categoryName,
+    required String colorName,
+    required String materialName,
     required String name,
-    String? seasonId,
-    String? styleId,
-    String? typeId,
-    DateTime? purchaseDate,
-    double? price,
-    String? imageUrl,
-    String? purchaseLink,
+    String? seasonName,
+    String? styleName,
+    String? itemTypeName,
+    File? imageFile,
   }) async {
     try {
-      return await Storage.addCloth(
-        categoryId: categoryId,
-        colorId: colorId,
-        materialId: materialId,
-        name: name,
-        seasonId: seasonId,
-        styleId: styleId,
-        typeId: typeId,
-        purchaseDate: purchaseDate,
-        price: price,
-        imageUrl: imageUrl,
-        purchaseLink: purchaseLink,
+      if (imageFile == null) {
+        throw Exception('이미지를 선택해주세요');
+      }
+
+      final data = {
+        'name': name,
+        'categoryName': categoryName,
+        'colorName': colorName,
+        'materialName': materialName,
+        if (seasonName != null) 'seasonName': seasonName,
+        if (styleName != null) 'styleName': styleName,
+        if (itemTypeName != null) 'itemTypeName': itemTypeName,
+      };
+
+      await ClothesService.createClothes(
+        token: token,
+        imageFile: imageFile,
+        data: data,
       );
     } catch (e) {
-      throw StorageException('옷 추가에 실패했습니다');
+      rethrow;
     }
   }
 

@@ -78,7 +78,73 @@ public class GoogleCalendarService {
         return buildCalendarService(credential);
     }
 
-    // 스케쥴 불러오고 저장
+    // 이메일로 스케쥴 불러오고 저장
+    @Transactional
+    public List<UserCalendar> fetchAndSaveSchedulesByEmail(String email)
+        throws IOException, GeneralSecurityException {
+        Optional<UserTable> userOptional = userRepository.findByEmail(email);
+
+        if (userOptional.isEmpty()) {
+            throw new IllegalArgumentException("앱에 로그인한 이메일 (" + email + ")을 찾을 수 없습니다. 먼저 회원가입해주세요.");
+        }
+        UserTable currentUser = userOptional.get();
+
+        Calendar service = getCalendarClientForCurrentUser();
+        String calenderId = "primary";
+
+        DateTime now = new DateTime(System.currentTimeMillis());
+        DateTime monthLater = new DateTime(System.currentTimeMillis() + 30L * 24 * 60 * 60 * 1000);
+
+        Events events = service.events().list(calenderId)
+                .setMaxResults(50)
+                .setTimeMin(now)
+                .setTimeMax(monthLater)
+                .setOrderBy("startTime")
+                .setSingleEvents(true)
+                .execute();
+
+        List<Event> items = events.getItems();
+        if (items == null || items.isEmpty()) {
+            return List.of();
+        }
+
+        List<UserCalendar> newSchedules = items.stream()
+                .filter(event -> event.getStart() != null && event.getEnd() != null)
+                .map(event -> {
+                    if (userCalendarRepository.existsByGoogleEventId(event.getId())) {
+                        return null;
+                    }
+
+                    UserCalendar userCalendar = new UserCalendar();
+
+                    userCalendar.setGoogleEventId(event.getId());
+                    userCalendar.setUserTable(currentUser);
+                    userCalendar.setEventSummary(event.getSummary());
+                    userCalendar.setLocation(event.getLocation());
+
+                    userCalendar.setStartTime(toOffsetDateTime(event.getStart()));
+                    userCalendar.setEndTime(toOffsetDateTime(event.getEnd()));
+
+                    userCalendar.setJsonData(event.toString());
+
+                    boolean isAllDay = event.getStart().getDate() != null && event.getStart().getDateTime() == null;
+                    userCalendar.setIsAllDay(isAllDay);
+
+                    userCalendar.setDressCodeTag(null);
+
+                    return userCalendar;
+                })
+                .filter(Objects::nonNull)
+                .toList();
+
+        if (!newSchedules.isEmpty()) {
+            userCalendarRepository.saveAll(newSchedules);
+        }
+
+        return newSchedules;
+    }
+
+    // UUID로 스케쥴 불러오고 저장 (기존 메서드 유지)
     @Transactional
     public List<UserCalendar> fetchAndSaveSchedules(String userIdentifier)
         throws IOException, GeneralSecurityException {

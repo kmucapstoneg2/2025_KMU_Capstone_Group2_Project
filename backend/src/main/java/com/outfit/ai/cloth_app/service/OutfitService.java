@@ -25,7 +25,8 @@ public class OutfitService {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yy.MM.dd");
 
-    private OutfitService(OutfitCombinationRepository outfitCombinationRepository, UserRepository userRepository) {
+    // Spring DI를 위한 생성자 (public 필수)
+    public OutfitService(OutfitCombinationRepository outfitCombinationRepository, UserRepository userRepository) {
         this.outfitCombinationRepository = outfitCombinationRepository;
         this.userRepository = userRepository;
     }

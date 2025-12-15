@@ -10,7 +10,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-// 인증 컨트롤러
+/**
+ * 인증 컨트롤러 - 회원가입/로그인 API
+ * 
+ * 엔드포인트:
+ * - POST /api/v1/auth/signup : 회원가입
+ * - POST /api/v1/auth/login  : 로그인 (토큰 발급)
+ * 
+ * Flutter에서 AuthService를 통해 호출됨
+ * @see AuthService
+ */
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {

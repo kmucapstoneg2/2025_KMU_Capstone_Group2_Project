@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/theme.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../../providers/closet_provider.dart';
+import '../../../providers/auth_provider.dart';
 import '../logic/logic.dart';
 import '../widgets/widgets.dart';
 import 'closet_add_page.dart';
@@ -70,7 +71,10 @@ class _ClosetPageState extends State<ClosetPage> {
             ),
             child: ErrorState(
               message: provider.error!,
-              onRetry: () => provider.loadClothes(),
+              onRetry: () {
+                final token = context.read<AuthProvider>().accessToken ?? '';
+                provider.loadClothes(token);
+              },
             ),
           );
         }
@@ -175,7 +179,8 @@ class _ClosetPageState extends State<ClosetPage> {
                 ),
               );
               if (result == true && mounted) {
-                context.read<ClosetProvider>().loadClothes();
+                final token = context.read<AuthProvider>().accessToken ?? '';
+                context.read<ClosetProvider>().loadClothes(token);
               }
             },
             child: const Icon(CupertinoIcons.add_circled),
@@ -242,7 +247,7 @@ class _ClosetPageState extends State<ClosetPage> {
             );
 
             if (result == true && mounted) {
-              context.read<ClosetProvider>().loadClothes();
+              context.read<ClosetProvider>().loadLocalClothes();
             }
           },
         );

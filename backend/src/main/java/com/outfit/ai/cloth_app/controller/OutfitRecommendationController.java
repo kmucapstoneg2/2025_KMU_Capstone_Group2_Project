@@ -24,10 +24,11 @@ public class OutfitRecommendationController {
         this.authService = authService;
     }
 
+    // 코디 추천 API - 이미지를 업로드하여 AI 추천을 받음
     @PostMapping(value = "/outfit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Mono<ResponseEntity<String>> recommendOutfit(
             @RequestHeader("Authorization") String authorizationHeader,
-            @RequestPart("imaage")MultipartFile image) {
+            @RequestPart("image") MultipartFile image) {  // 오타 수정: imaage -> image
 
         if(image.isEmpty()) {
             return Mono.just(ResponseEntity.badRequest().body("\"error\": \"Image file is missing.\"}"));

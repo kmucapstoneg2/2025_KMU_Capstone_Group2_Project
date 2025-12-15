@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import '../../../core/theme/theme.dart';
 
@@ -17,25 +15,13 @@ class ProfileCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final username = user['username'] as String;
     final email = user['email'] as String;
-    final profileImageUrl = user['profileImageUrl'] as String?;
+    final String? profileImageUrl = user['profileImageUrl'] as String?;
     
-    // base64 이미지를 Uint8List로 변환
-    Uint8List? imageBytes;
-    if (profileImageUrl != null && profileImageUrl.isNotEmpty) {
-      try {
-        if (profileImageUrl.startsWith('data:image')) {
-          // data:image/jpeg;base64,... 형식
-          final base64String = profileImageUrl.split(',').last;
-          imageBytes = base64Decode(base64String);
-        } else {
-          // base64만 있는 경우
-          imageBytes = base64Decode(profileImageUrl);
-        }
-      } catch (e) {
-        // base64 디코딩 실패 시 null로 유지
-        imageBytes = null;
-      }
-    }
+    // S3 URL인지 확인
+    final bool hasValidImageUrl = profileImageUrl != null && 
+        profileImageUrl.isNotEmpty && 
+        profileImageUrl.startsWith('http');
+    final String imageUrl = hasValidImageUrl ? profileImageUrl : '';
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -60,14 +46,14 @@ class ProfileCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.primary,
                   shape: BoxShape.circle,
-                  image: imageBytes != null
+                  image: hasValidImageUrl
                       ? DecorationImage(
-                          image: MemoryImage(imageBytes),
+                          image: NetworkImage(imageUrl),
                           fit: BoxFit.cover,
                         )
                       : null,
                 ),
-                child: imageBytes == null
+                child: !hasValidImageUrl
                     ? const Icon(
                         CupertinoIcons.person,
                         size: 40,

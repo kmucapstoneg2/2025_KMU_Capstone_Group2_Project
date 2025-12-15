@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:image_picker/image_picker.dart';
@@ -26,8 +26,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
   late String _selectedRegion;
   bool _isLoading = false;
   String? _usernameError;
-  String? _profileImageBase64; // base64 인코딩된 프로필 이미지
+  File? _profileImageFile; // 업로드할 이미지 파일
   Uint8List? _profileImageBytes; // 표시용 이미지 바이트
+  String? _existingProfileImageUrl; // 기존 프로필 이미지 URL (S3)
 
   final List<String> _regions = [
     '서울', '부산', '대구', '인천', '광주',
@@ -44,20 +45,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
     _selectedRegion = widget.currentProfile['region'] as String? ?? '서울';
     
-    // 기존 프로필 이미지가 있으면 로드
-    final existingImage = widget.currentProfile['profileImageUrl'] as String?;
-    if (existingImage != null && existingImage.isNotEmpty) {
-      if (existingImage.startsWith('data:image')) {
-        // data:image/jpeg;base64,... 형식
-        final base64String = existingImage.split(',').last;
-        _profileImageBase64 = existingImage;
-        _profileImageBytes = base64Decode(base64String);
-      } else {
-        // base64만 있는 경우
-        _profileImageBase64 = 'data:image/jpeg;base64,$existingImage';
-        _profileImageBytes = base64Decode(existingImage);
-      }
-    }
+    // 기존 프로필 이미지 URL 저장 (S3 URL)
+    _existingProfileImageUrl = widget.currentProfile['profileImageUrl'] as String?;
   }
 
   @override
@@ -96,11 +85,21 @@ class _EditProfilePageState extends State<EditProfilePage> {
         throw ApiException('로그인이 필요합니다', 401);
       }
 
+      String? profileImageUrl = _existingProfileImageUrl;
+      
+      // 새 이미지가 선택되었다면 S3에 업로드
+      if (_profileImageFile != null) {
+        profileImageUrl = await ProfileService.uploadProfileImage(
+          token: token,
+          imageFile: _profileImageFile!,
+        );
+      }
+
       await ProfileService.updateProfile(
         token: token,
         username: _usernameController.text.trim(),
         region: _selectedRegion,
-        profileImageUrl: _profileImageBase64, // base64 이미지 전달
+        profileImageUrl: profileImageUrl,
       );
 
       // AuthProvider의 username 업데이트
@@ -169,12 +168,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
       // JPEG로 인코딩 (품질 85)
       final resizedBytes = Uint8List.fromList(img.encodeJpg(resizedImage, quality: 85));
 
-      // base64 인코딩
-      final base64String = base64Encode(resizedBytes);
-      final dataUrl = 'data:image/jpeg;base64,$base64String';
+      // 파일로 저장 (임시)
+      final tempFile = File('${image.path}_resized.jpg');
+      await tempFile.writeAsBytes(resizedBytes);
 
       setState(() {
-        _profileImageBase64 = dataUrl;
+        _profileImageFile = tempFile;
         _profileImageBytes = resizedBytes;
       });
 
@@ -293,9 +292,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                 image: MemoryImage(_profileImageBytes!),
                                 fit: BoxFit.cover,
                               )
-                            : null,
+                            : (_existingProfileImageUrl != null && _existingProfileImageUrl!.startsWith('http'))
+                                ? DecorationImage(
+                                    image: NetworkImage(_existingProfileImageUrl!),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
                       ),
-                      child: _profileImageBytes == null
+                      child: _profileImageBytes == null && 
+                              (_existingProfileImageUrl == null || !_existingProfileImageUrl!.startsWith('http'))
                           ? const Icon(
                               CupertinoIcons.person,
                               size: 50,

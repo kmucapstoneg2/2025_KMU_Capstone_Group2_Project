@@ -7,6 +7,7 @@ import com.outfit.ai.cloth_app.repository.UserRepository;
 import com.outfit.ai.cloth_app.entity.UserTable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -14,9 +15,16 @@ import java.util.UUID;
 @Service
 public class MyPageService {
     private final UserRepository userRepository;
+    private final S3FileUploader s3FileUploader;
 
-    public MyPageService(UserRepository userRepository) {
+    public MyPageService(UserRepository userRepository, S3FileUploader s3FileUploader) {
         this.userRepository = userRepository;
+        this.s3FileUploader = s3FileUploader;
+    }
+    
+    // 프로필 이미지 업로드 (S3)
+    public String uploadProfileImage(UUID userId, MultipartFile imageFile) {
+        return s3FileUploader.upload(imageFile, userId);
     }
 
     // 프로필 불러오기
