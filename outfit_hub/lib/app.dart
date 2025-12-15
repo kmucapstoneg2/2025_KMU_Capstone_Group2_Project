@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
+import 'core/theme/theme.dart';
 import 'providers/providers.dart';
 import 'main_tab_view.dart';
 import 'main.dart';
@@ -40,10 +41,7 @@ class MyApp extends StatelessWidget {
       ],
       child: CupertinoApp(
         title: 'Outfit Hub',
-        theme: const CupertinoThemeData(
-          primaryColor: CupertinoColors.systemBlue,
-          brightness: Brightness.light,
-        ),
+        theme: AppTheme.theme,
         home: const AuthWrapper(),
         debugShowCheckedModeBanner: false,
       ),
