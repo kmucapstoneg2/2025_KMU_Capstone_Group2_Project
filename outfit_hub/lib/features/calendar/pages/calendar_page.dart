@@ -1,11 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/theme.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../../core/utils/date_helper.dart';
 import '../../../core/utils/dialog_helper.dart';
 import '../../../core/error/error_handler.dart';
+import '../../../core/services/google_calendar_service.dart';
 import '../../../providers/calendar_provider.dart';
+import '../../../providers/auth_provider.dart';
 import '../logic/logic.dart';
 import '../widgets/widgets.dart';
 
@@ -23,11 +26,16 @@ class CalendarPage extends StatefulWidget {
 class _CalendarPageState extends State<CalendarPage> {
   DateTime currentMonth = DateTime.now();
   DateTime? selectedDate;
+  bool _showGoogleBanner = true;  // 구글 연동 배너 표시 여부
 
   @override
   void initState() {
     super.initState();
     selectedDate = DateTime.now();
+    // 구글 캘린더 상태 확인
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CalendarProvider>().checkGoogleCalendarStatus();
+    });
   }
 
   void _goToPreviousMonth() {
@@ -48,8 +56,171 @@ class _CalendarPageState extends State<CalendarPage> {
     });
   }
 
+  /// 구글 캘린더 연동 시작
+  Future<void> _linkGoogleCalendar() async {
+    try {
+      final authUrl = GoogleCalendarService.getGoogleAuthUrl();
+      final uri = Uri.parse(authUrl);
+      
+      // 앱 내 웹뷰에서 OAuth 인증 페이지 열기
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.inAppWebView);
+        
+        // 사용자에게 안내 메시지
+        if (mounted) {
+          await showCupertinoDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: const Text('구글 로그인'),
+              content: const Column(
+                children: [
+                  SizedBox(height: 12),
+                  Text(
+                    '브라우저에서 구글 계정으로 로그인해주세요.\n\n'
+                    '로그인 완료 후 아래 버튼을 눌러주세요.',
+                  ),
+                ],
+              ),
+              actions: [
+                CupertinoDialogAction(
+                  child: const Text('취소'),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                CupertinoDialogAction(
+                  isDefaultAction: true,
+                  child: const Text('연동 완료'),
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    // 임시로 연동 완료 처리 (실제로는 OAuth 콜백에서 처리)
+                    await _completeGoogleLink();
+                  },
+                ),
+              ],
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          await showCupertinoDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: const Text('오류'),
+              content: const Text('브라우저를 열 수 없습니다'),
+              actions: [
+                CupertinoDialogAction(
+                  child: const Text('확인'),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        await ErrorHandler.showError(context, e);
+      }
+    }
+  }
+  
+  /// 구글 캘린더 연동 완료 처리
+  Future<void> _completeGoogleLink() async {
+    try {
+      // TODO: 실제 OAuth 콜백에서 받은 토큰으로 처리
+      // 현재는 테스트용으로 연동 완료 처리
+      await context.read<CalendarProvider>().linkGoogleCalendar(
+        accessToken: 'temp_token',  // 실제로는 OAuth에서 받은 토큰
+        email: 'user@gmail.com',    // 실제로는 OAuth에서 받은 이메일
+      );
+      
+      if (mounted) {
+        await DialogHelper.showSuccess(
+          context,
+          content: '구글 캘린더가 연동되었습니다',
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        await ErrorHandler.showError(context, e);
+      }
+    }
+  }
+  
+  /// 구글 캘린더 연동 해제
+  Future<void> _unlinkGoogleCalendar() async {
+    final result = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('연동 해제'),
+        content: const Text('구글 캘린더 연동을 해제하시겠습니까?\n\n연동 해제 후에도 이미 추가된 일정은 유지됩니다.'),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('취소'),
+            onPressed: () => Navigator.pop(context, false),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            child: const Text('연동 해제'),
+            onPressed: () => Navigator.pop(context, true),
+          ),
+        ],
+      ),
+    );
+    
+    if (result == true && mounted) {
+      await context.read<CalendarProvider>().unlinkGoogleCalendar();
+      await DialogHelper.showSuccess(
+        context,
+        content: '구글 캘린더 연동이 해제되었습니다',
+      );
+    }
+  }
+  
+  /// 구글 캘린더 동기화
+  Future<void> _syncGoogleCalendar() async {
+    try {
+      final authProvider = context.read<AuthProvider>();
+      final token = authProvider.accessToken;
+      
+      if (token == null) {
+        if (mounted) {
+          await showCupertinoDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: const Text('알림'),
+              content: const Text('로그인이 필요합니다'),
+              actions: [
+                CupertinoDialogAction(
+                  child: const Text('확인'),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+          );
+        }
+        return;
+      }
+      
+      await context.read<CalendarProvider>().syncGoogleCalendar(userToken: token);
+      
+      if (mounted) {
+        await DialogHelper.showSuccess(
+          context,
+          content: '일정이 동기화되었습니다',
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        await ErrorHandler.showError(context, e);
+      }
+    }
+  }
+
   Future<void> _showAddScheduleDialog() async {
     if (selectedDate == null) return;
+    
+    final provider = context.read<CalendarProvider>();
+    final isGoogleLinked = provider.isGoogleLinked;
 
     final titleController = TextEditingController();
     final timeController = TextEditingController();
@@ -76,6 +247,35 @@ class _CalendarPageState extends State<CalendarPage> {
               controller: locationController,
               placeholder: '장소',
             ),
+            if (isGoogleLinked) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE3F2FD),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(
+                      CupertinoIcons.checkmark_circle_fill,
+                      size: 14,
+                      color: Color(0xFF1976D2),
+                    ),
+                    SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        '구글 캘린더에도 추가됩니다',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF1976D2),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
         actions: [
@@ -94,14 +294,43 @@ class _CalendarPageState extends State<CalendarPage> {
 
     if (result == true && titleController.text.isNotEmpty) {
       try {
-        await ScheduleLogic.addSchedule(
-          date: selectedDate!,
-          title: titleController.text,
-          time: timeController.text.isNotEmpty ? timeController.text : null,
-          location: locationController.text.isNotEmpty
-              ? locationController.text
-              : null,
-        );
+        if (isGoogleLinked) {
+          // 구글 캘린더 연동 시 - 구글 캘린더 + 로컬 모두 저장
+          final authProvider = context.read<AuthProvider>();
+          final token = authProvider.accessToken;
+          
+          if (token != null) {
+            await provider.addScheduleToGoogle(
+              userToken: token,
+              dateKey: DateHelper.toDateKey(selectedDate!),
+              title: titleController.text,
+              time: timeController.text.isNotEmpty ? timeController.text : null,
+              location: locationController.text.isNotEmpty
+                  ? locationController.text
+                  : null,
+            );
+          } else {
+            // 토큰 없으면 로컬에만 저장
+            await ScheduleLogic.addSchedule(
+              date: selectedDate!,
+              title: titleController.text,
+              time: timeController.text.isNotEmpty ? timeController.text : null,
+              location: locationController.text.isNotEmpty
+                  ? locationController.text
+                  : null,
+            );
+          }
+        } else {
+          // 구글 캘린더 미연동 시 - 로컬에만 저장
+          await ScheduleLogic.addSchedule(
+            date: selectedDate!,
+            title: titleController.text,
+            time: timeController.text.isNotEmpty ? timeController.text : null,
+            location: locationController.text.isNotEmpty
+                ? locationController.text
+                : null,
+          );
+        }
 
         if (mounted) {
           await context.read<CalendarProvider>().loadData();
@@ -182,15 +411,45 @@ class _CalendarPageState extends State<CalendarPage> {
         return CupertinoPageScaffold(
           navigationBar: CupertinoNavigationBar(
             middle: const Text('캘린더'),
-            trailing: CupertinoButton(
-              padding: EdgeInsets.zero,
-              onPressed: _showAddScheduleDialog,
-              child: const Icon(CupertinoIcons.add),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 새로고침 버튼 (구글 연동 시에만 동기화 표시)
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: provider.isSyncing ? null : () async {
+                    if (provider.isGoogleLinked) {
+                      await _syncGoogleCalendar();
+                    } else {
+                      await provider.loadData();
+                    }
+                  },
+                  child: provider.isSyncing
+                      ? const CupertinoActivityIndicator()
+                      : const Icon(CupertinoIcons.arrow_2_circlepath),
+                ),
+                // 일정 추가 버튼
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: _showAddScheduleDialog,
+                  child: const Icon(CupertinoIcons.add),
+                ),
+              ],
             ),
           ),
           child: SafeArea(
             child: Column(
               children: [
+                // 구글 캘린더 연동 배너
+                if (_showGoogleBanner)
+                  GoogleCalendarBanner(
+                    isLinked: provider.isGoogleLinked,
+                    linkedEmail: provider.googleLinkedEmail,
+                    isSyncing: provider.isSyncing,
+                    onLinkPressed: _linkGoogleCalendar,
+                    onUnlinkPressed: _unlinkGoogleCalendar,
+                    onSyncPressed: _syncGoogleCalendar,
+                  ),
                 MonthSelector(
                   currentMonth: currentMonth,
                   onPrevious: _goToPreviousMonth,
