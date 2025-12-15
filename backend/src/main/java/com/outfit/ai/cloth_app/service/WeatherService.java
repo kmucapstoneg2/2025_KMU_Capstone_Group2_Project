@@ -2,7 +2,6 @@ package com.outfit.ai.cloth_app.service;
 
 import com.outfit.ai.cloth_app.dto.WeatherDto;
 import com.outfit.ai.cloth_app.api.weather_api.WeatherApiClient;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service

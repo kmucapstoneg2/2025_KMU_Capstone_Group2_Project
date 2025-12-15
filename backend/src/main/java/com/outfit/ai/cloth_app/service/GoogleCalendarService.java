@@ -73,6 +73,7 @@ public class GoogleCalendarService {
         }
 
         String accessToken = client.getAccessToken().getTokenValue();
+        @SuppressWarnings("deprecation")
         Credential credential = new GoogleCredential().setAccessToken(accessToken);
 
         return buildCalendarService(credential);

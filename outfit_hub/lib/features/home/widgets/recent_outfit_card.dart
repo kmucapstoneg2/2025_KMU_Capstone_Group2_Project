@@ -35,7 +35,7 @@ class RecentOutfitCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
-                  '오늘 일정',
+                  '최근 코디',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -51,7 +51,7 @@ class RecentOutfitCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             if (outfits.isEmpty)
               const Text(
-                '오늘 일정이 없습니다',
+                '저장된 코디가 없습니다',
                 style: TextStyle(
                   color: AppColors.textSecondary,
                   fontSize: 14,

@@ -16,6 +16,7 @@ import java.util.Map;
 // 구글 인증 컨트롤러
 @Controller
 public class GoogleAuthController {
+    @SuppressWarnings("unused")
     private final GoogleCalendarService calendarService;
 
     public GoogleAuthController(GoogleCalendarService calendarService) {

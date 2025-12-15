@@ -39,6 +39,8 @@ public class CalendarController {
         String userIdString = authentication.getName();
 
         try {
+            // TODO: GoogleCredential은 deprecated되었으므로 향후 GoogleAuthorizationCodeFlow로 교체 필요
+            @SuppressWarnings({"deprecation", "unused"})
             Credential credential = new GoogleCredential.Builder()
                     .setTransport(GoogleNetHttpTransport.newTrustedTransport())
                     .setJsonFactory(GsonFactory.getDefaultInstance())

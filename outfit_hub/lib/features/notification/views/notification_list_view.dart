@@ -8,7 +8,6 @@ import 'package:provider/provider.dart';
 
 import '../../../providers/notification_provider.dart';
 import '../models/notification_model.dart';
-import '../services/websocket_service.dart';
 
 class NotificationListView extends StatelessWidget {
   const NotificationListView({super.key});
@@ -18,29 +17,15 @@ class NotificationListView extends StatelessWidget {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: const Text('알림'),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // 테스트용 더미 알림 추가 버튼
-            CupertinoButton(
+        trailing: Consumer<NotificationProvider>(
+          builder: (context, provider, child) {
+            if (!provider.hasUnread) return const SizedBox.shrink();
+            return CupertinoButton(
               padding: EdgeInsets.zero,
-              onPressed: () {
-                context.read<NotificationProvider>().addDummyNotification();
-              },
-              child: const Icon(CupertinoIcons.add_circled, size: 24),
-            ),
-            // 모두 읽음 처리 버튼
-            Consumer<NotificationProvider>(
-              builder: (context, provider, child) {
-                if (!provider.hasUnread) return const SizedBox.shrink();
-                return CupertinoButton(
-                  padding: EdgeInsets.zero,
-                  onPressed: () => provider.markAllAsRead(),
-                  child: const Icon(CupertinoIcons.checkmark_seal, size: 24),
-                );
-              },
-            ),
-          ],
+              onPressed: () => provider.markAllAsRead(),
+              child: const Icon(CupertinoIcons.checkmark_seal, size: 24),
+            );
+          },
         ),
       ),
       child: SafeArea(
@@ -59,42 +44,8 @@ class NotificationListView extends StatelessWidget {
   }
 
   Widget _buildConnectionStatus(NotificationProvider provider) {
-    String statusText;
-    Color statusColor;
-
-    switch (provider.connectionState) {
-      case WebSocketConnectionState.connected:
-        return const SizedBox.shrink();
-      case WebSocketConnectionState.connecting:
-        statusText = '연결 중...';
-        statusColor = CupertinoColors.systemOrange;
-        break;
-      case WebSocketConnectionState.reconnecting:
-        statusText = '재연결 중...';
-        statusColor = CupertinoColors.systemOrange;
-        break;
-      case WebSocketConnectionState.disconnected:
-        statusText = '연결 끊김';
-        statusColor = CupertinoColors.systemRed;
-        break;
-    }
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      color: statusColor.withOpacity(0.1),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const CupertinoActivityIndicator(radius: 8),
-          const SizedBox(width: 8),
-          Text(
-            statusText,
-            style: TextStyle(color: statusColor, fontSize: 14),
-          ),
-        ],
-      ),
-    );
+    // REST API 사용으로 연결 상태 표시 제거
+    return const SizedBox.shrink();
   }
 
   Widget _buildNotificationList(BuildContext context, NotificationProvider provider) {
@@ -115,13 +66,6 @@ class NotificationListView extends StatelessWidget {
                 fontSize: 16,
                 color: CupertinoColors.systemGrey,
               ),
-            ),
-            const SizedBox(height: 24),
-            CupertinoButton(
-              onPressed: () {
-                provider.addDummyNotification();
-              },
-              child: const Text('테스트 알림 추가'),
             ),
           ],
         ),

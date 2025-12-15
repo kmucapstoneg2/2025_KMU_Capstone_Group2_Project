@@ -9,7 +9,6 @@ import '../../../providers/notification_provider.dart';
 import '../../../main.dart';
 import '../logic/logic.dart';
 import '../widgets/widgets.dart';
-import '../../closet/pages/closet_add_page.dart';
 import '../../virtual_fitting/pages/virtual_fitting_page.dart';
 import '../../notification/views/notification_list_view.dart';
 
@@ -75,14 +74,6 @@ class _HomePageState extends State<HomePage> {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // 테스트 알림 추가 버튼
-            CupertinoButton(
-              padding: EdgeInsets.zero,
-              onPressed: () {
-                context.read<NotificationProvider>().addDummyNotification();
-              },
-              child: const Icon(CupertinoIcons.add_circled, size: 24),
-            ),
             // 알림 아이콘 버튼
             Consumer<NotificationProvider>(
               builder: (context, provider, child) {
@@ -212,18 +203,10 @@ class _HomePageState extends State<HomePage> {
       children: [
         Expanded(
           child: QuickActionButton(
-            icon: CupertinoIcons.add_circled_solid,
-            label: '옷 추가',
-            onTap: () async {
-              final result = await Navigator.push(
-                context,
-                CupertinoPageRoute(
-                  builder: (_) => const ClosetAddPage(),
-                ),
-              );
-              if (result == true) {
-                _loadData();
-              }
+            icon: CupertinoIcons.sparkles,
+            label: '코디 추천',
+            onTap: () {
+              mainTabKey.currentState?.changeTab(2); // 캘린더 탭으로 이동
             },
           ),
         ),

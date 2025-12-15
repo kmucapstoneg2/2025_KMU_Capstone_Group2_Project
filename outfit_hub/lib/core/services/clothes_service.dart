@@ -27,7 +27,8 @@ class ClothesService {
     required Map<String, dynamic> data,
   }) async {
     print('[ClothesService] createClothes called');
-    await ApiService.postMultipart(
+    print('[ClothesService] data: $data');
+    await ApiService.postMultipartFormData(
       '/wardrobe/clothes',
       data: data,
       file: imageFile,
@@ -46,6 +47,30 @@ class ClothesService {
     final response = await ApiService.get('/wardrobe/clothes', token: token);
     print('[ClothesService] Raw response: $response');
     return ClothesListResponse.fromJson(response);
+  }
+
+  /// 옷 수정
+  /// PUT /api/v1/wardrobe/clothes/{clothId}
+  static Future<void> updateClothes({
+    required String token,
+    required String clothId,
+    required Map<String, dynamic> data,
+  }) async {
+    print('[ClothesService] updateClothes called: $clothId');
+    print('[ClothesService] Update data: $data');
+    await ApiService.putFormData('/wardrobe/clothes/$clothId', data, token: token);
+    print('[ClothesService] Clothes updated successfully');
+  }
+
+  /// 옷 삭제
+  /// DELETE /api/v1/wardrobe/clothes/{clothId}
+  static Future<void> deleteClothes({
+    required String token,
+    required String clothId,
+  }) async {
+    print('[ClothesService] deleteClothes called: $clothId');
+    await ApiService.delete('/wardrobe/clothes/$clothId', token: token);
+    print('[ClothesService] Clothes deleted successfully');
   }
 }
 

@@ -137,4 +137,79 @@ public class ClothesService {
 
         return dto;
     }
+    
+    // 옷 수정
+    @Transactional
+    public void updateClothes(UUID userId, UUID clothId, String name, String categoryName,
+                               String colorName, String materialName, String seasonName,
+                               String styleName, String itemTypeName) {
+        System.out.println("=== 옷 수정 시작 ===");
+        System.out.println("User ID: " + userId);
+        System.out.println("Cloth ID: " + clothId);
+
+        ClothesTable clothes = clothesRepository.findById(clothId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 옷입니다."));
+
+        // 소유자 확인
+        if (!clothes.getUserTable().getUserId().equals(userId)) {
+            throw new IllegalArgumentException("수정 권한이 없습니다.");
+        }
+
+        // 선택 필드만 업데이트
+        if (name != null && !name.isEmpty()) {
+            clothes.setClothName(name);
+        }
+        if (categoryName != null && !categoryName.isEmpty()) {
+            CategoryCode category = categoryRepository.findByCategoryName(categoryName)
+                    .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 카테고리 이름입니다."));
+            clothes.setCategoryCode(category);
+        }
+        if (colorName != null && !colorName.isEmpty()) {
+            ColorCode color = colorRepository.findByColorName(colorName)
+                    .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 색상 이름입니다."));
+            clothes.setColorCode(color);
+        }
+        if (materialName != null && !materialName.isEmpty()) {
+            MaterialCode material = materialRepository.findByMaterialName(materialName)
+                    .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 소재 이름입니다."));
+            clothes.setMaterialCode(material);
+        }
+        if (styleName != null && !styleName.isEmpty()) {
+            StyleCode style = styleCodeRepository.findByStyleName(styleName)
+                    .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 스타일 이름입니다."));
+            clothes.setStyleCode(style);
+        }
+        if (seasonName != null && !seasonName.isEmpty()) {
+            SeasonCode season = seasonCodeRepository.findBySeasonName(seasonName)
+                    .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 계절 이름입니다."));
+            clothes.setSeasonCode(season);
+        }
+        if (itemTypeName != null && !itemTypeName.isEmpty()) {
+            ItemTypeCode itemType = itemTypeCodeRepository.findByItemTypeName(itemTypeName)
+                    .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 종류 이름입니다."));
+            clothes.setItemTypeCode(itemType);
+        }
+
+        clothesRepository.save(clothes);
+        System.out.println("=== 옷 수정 완료 ===");
+    }
+    
+    // 옷 삭제
+    @Transactional
+    public void deleteClothes(UUID userId, UUID clothId) {
+        System.out.println("=== 옷 삭제 시작 ===");
+        System.out.println("User ID: " + userId);
+        System.out.println("Cloth ID: " + clothId);
+
+        ClothesTable clothes = clothesRepository.findById(clothId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 옷입니다."));
+
+        // 소유자 확인
+        if (!clothes.getUserTable().getUserId().equals(userId)) {
+            throw new IllegalArgumentException("삭제 권한이 없습니다.");
+        }
+
+        clothesRepository.delete(clothes);
+        System.out.println("=== 옷 삭제 완료 ===");
+    }
 }

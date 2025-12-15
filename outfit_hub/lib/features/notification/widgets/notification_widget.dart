@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../providers/notification_provider.dart';
-import '../services/websocket_service.dart';
 import '../views/notification_list_view.dart';
 
 /// 알림 아이콘 버튼 (배지 포함)
@@ -94,32 +93,14 @@ class ConnectionStatusIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<NotificationProvider>(
       builder: (context, provider, child) {
-        Color color;
-        String tooltip;
-
-        switch (provider.connectionState) {
-          case WebSocketConnectionState.connected:
-            color = Colors.green;
-            tooltip = '연결됨';
-            break;
-          case WebSocketConnectionState.connecting:
-          case WebSocketConnectionState.reconnecting:
-            color = Colors.orange;
-            tooltip = '연결 중...';
-            break;
-          case WebSocketConnectionState.disconnected:
-            color = Colors.red;
-            tooltip = '연결 끊김';
-            break;
-        }
-
+        // REST API 사용으로 연결 상태 표시 제거
         return Tooltip(
-          message: tooltip,
+          message: '알림',
           child: Container(
             width: 8,
             height: 8,
-            decoration: BoxDecoration(
-              color: color,
+            decoration: const BoxDecoration(
+              color: Colors.green,
               shape: BoxShape.circle,
             ),
           ),

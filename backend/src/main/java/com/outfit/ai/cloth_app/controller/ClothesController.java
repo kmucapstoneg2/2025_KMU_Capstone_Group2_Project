@@ -36,9 +36,24 @@ public class ClothesController {
     @PostMapping("/clothes")
     public ResponseEntity<Void> createClothes(
             @RequestHeader("Authorization") String authorizationHeader,
-            @RequestPart("data") ClothesCreateRequestDto request,
+            @RequestParam("name") String name,
+            @RequestParam("categoryName") String categoryName,
+            @RequestParam("colorName") String colorName,
+            @RequestParam("materialName") String materialName,
+            @RequestParam(value = "seasonName", required = false) String seasonName,
+            @RequestParam(value = "styleName", required = false) String styleName,
+            @RequestParam(value = "itemTypeName", required = false) String itemTypeName,
             @RequestPart("image") MultipartFile imageFile) {
         UUID userId = authService.getUserIdFromAuthHeader(authorizationHeader);
+        
+        ClothesCreateRequestDto request = new ClothesCreateRequestDto();
+        request.setName(name);
+        request.setCategoryCode(categoryName);
+        request.setColorCode(colorName);
+        request.setMaterialCode(materialName);
+        request.setSeasonName(seasonName);
+        request.setStyleName(styleName);
+        request.setItemTypeName(itemTypeName);
 
         clothesService.createClothes(userId, request, imageFile);
 
@@ -54,5 +69,37 @@ public class ClothesController {
         ClothesListResponseDto response = clothesService.getClothesList(userId);
 
         return ResponseEntity.ok(response);
+    }
+    
+    // 옷 수정
+    @PutMapping("/clothes/{clothId}")
+    public ResponseEntity<Void> updateClothes(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable UUID clothId,
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "categoryName", required = false) String categoryName,
+            @RequestParam(value = "colorName", required = false) String colorName,
+            @RequestParam(value = "materialName", required = false) String materialName,
+            @RequestParam(value = "seasonName", required = false) String seasonName,
+            @RequestParam(value = "styleName", required = false) String styleName,
+            @RequestParam(value = "itemTypeName", required = false) String itemTypeName) {
+        UUID userId = authService.getUserIdFromAuthHeader(authorizationHeader);
+        
+        clothesService.updateClothes(userId, clothId, name, categoryName, colorName, 
+                                     materialName, seasonName, styleName, itemTypeName);
+
+        return ResponseEntity.ok().build();
+    }
+    
+    // 옷 삭제
+    @DeleteMapping("/clothes/{clothId}")
+    public ResponseEntity<Void> deleteClothes(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable UUID clothId) {
+        UUID userId = authService.getUserIdFromAuthHeader(authorizationHeader);
+
+        clothesService.deleteClothes(userId, clothId);
+
+        return ResponseEntity.ok().build();
     }
 }

@@ -94,6 +94,71 @@ class ApiService {
     }
   }
 
+  /// DELETE 요청
+  static Future<Map<String, dynamic>> delete(
+    String endpoint, {
+    String? token,
+  }) async {
+    try {
+      final headers = <String, String>{
+        'Content-Type': 'application/json',
+      };
+      if (token != null) {
+        headers['Authorization'] = 'Bearer $token';
+      }
+      
+      print('[API DELETE] $endpoint');
+      
+      final response = await _client.delete(
+        Uri.parse('$baseUrl$endpoint'),
+        headers: headers,
+      ).timeout(const Duration(seconds: 30));
+      
+      print('[API DELETE Response] ${response.statusCode}: ${response.body}');
+      
+      return _handleResponse(response);
+    } on SocketException {
+      throw ApiException('서버에 연결할 수 없습니다', 0);
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('네트워크 오류가 발생했습니다: $e', 0);
+    }
+  }
+
+  /// PATCH 요청
+  static Future<Map<String, dynamic>> patch(
+    String endpoint,
+    Map<String, dynamic> body, {
+    String? token,
+  }) async {
+    try {
+      final headers = <String, String>{
+        'Content-Type': 'application/json',
+      };
+      if (token != null) {
+        headers['Authorization'] = 'Bearer $token';
+      }
+      
+      print('[API PATCH] $endpoint');
+      print('[API PATCH Body] $body');
+      
+      final response = await _client.patch(
+        Uri.parse('$baseUrl$endpoint'),
+        headers: headers,
+        body: jsonEncode(body),
+      ).timeout(const Duration(seconds: 30));
+      
+      print('[API PATCH Response] ${response.statusCode}: ${response.body}');
+      
+      return _handleResponse(response);
+    } on SocketException {
+      throw ApiException('서버에 연결할 수 없습니다', 0);
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('네트워크 오류가 발생했습니다: $e', 0);
+    }
+  }
+
   /// GET 요청
   static Future<Map<String, dynamic>> get(
     String endpoint, {
@@ -163,6 +228,142 @@ class ApiService {
       final streamedResponse = await request.send()
           .timeout(const Duration(seconds: 60));
       final response = await http.Response.fromStream(streamedResponse);
+      
+      return _handleResponse(response);
+    } on SocketException {
+      throw ApiException('서버에 연결할 수 없습니다', 0);
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('네트워크 오류가 발생했습니다: $e', 0);
+    }
+  }
+
+  /// Multipart form-data POST 요청 (파일 업로드용 - 각 필드를 개별 전송)
+  static Future<Map<String, dynamic>> postMultipartFormData(
+    String endpoint, {
+    required Map<String, dynamic> data,
+    required File file,
+    required String fileFieldName,
+    String? token,
+  }) async {
+    try {
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl$endpoint'),
+      );
+      
+      if (token != null) {
+        request.headers['Authorization'] = 'Bearer $token';
+      }
+      
+      // 각 필드를 개별적으로 추가 (JSON으로 감싸지 않음)
+      data.forEach((key, value) {
+        if (value != null) {
+          request.fields[key] = value.toString();
+        }
+      });
+      
+      // 파일 추가
+      request.files.add(await http.MultipartFile.fromPath(
+        fileFieldName,
+        file.path,
+      ));
+      
+      print('[API POST FormData] $endpoint');
+      print('[API POST FormData Fields] ${request.fields}');
+      
+      final streamedResponse = await request.send()
+          .timeout(const Duration(seconds: 60));
+      final response = await http.Response.fromStream(streamedResponse);
+      
+      print('[API POST FormData Response] ${response.statusCode}');
+      
+      return _handleResponse(response);
+    } on SocketException {
+      throw ApiException('서버에 연결할 수 없습니다', 0);
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('네트워크 오류가 발생했습니다: $e', 0);
+    }
+  }
+
+  /// Multipart PUT 요청 (파일 업로드용)
+  static Future<Map<String, dynamic>> putMultipart(
+    String endpoint, {
+    required Map<String, dynamic> data,
+    required File file,
+    required String fileFieldName,
+    String? token,
+  }) async {
+    try {
+      final request = http.MultipartRequest(
+        'PUT',
+        Uri.parse('$baseUrl$endpoint'),
+      );
+      
+      if (token != null) {
+        request.headers['Authorization'] = 'Bearer $token';
+      }
+      
+      // JSON 데이터 추가
+      request.fields['data'] = jsonEncode(data);
+      
+      // 파일 추가
+      request.files.add(await http.MultipartFile.fromPath(
+        fileFieldName,
+        file.path,
+      ));
+      
+      print('[API PUT Multipart] $endpoint');
+      print('[API PUT Multipart Data] $data');
+      print('[API PUT Multipart File] ${file.path}');
+      
+      final streamedResponse = await request.send()
+          .timeout(const Duration(seconds: 60));
+      final response = await http.Response.fromStream(streamedResponse);
+      
+      print('[API PUT Multipart Response] ${response.statusCode}: ${response.body}');
+      
+      return _handleResponse(response);
+    } on SocketException {
+      throw ApiException('서버에 연결할 수 없습니다', 0);
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('네트워크 오류가 발생했습니다: $e', 0);
+    }
+  }
+  
+  /// PUT Form Data 요청 (파일 없이 form-data로 전송)
+  static Future<Map<String, dynamic>> putFormData(
+    String endpoint,
+    Map<String, dynamic> data, {
+    String? token,
+  }) async {
+    try {
+      final request = http.MultipartRequest(
+        'PUT',
+        Uri.parse('$baseUrl$endpoint'),
+      );
+      
+      if (token != null) {
+        request.headers['Authorization'] = 'Bearer $token';
+      }
+      
+      // 각 필드를 개별적으로 추가
+      data.forEach((key, value) {
+        if (value != null) {
+          request.fields[key] = value.toString();
+        }
+      });
+      
+      print('[API PUT FormData] $endpoint');
+      print('[API PUT FormData Fields] ${request.fields}');
+      
+      final streamedResponse = await request.send()
+          .timeout(const Duration(seconds: 60));
+      final response = await http.Response.fromStream(streamedResponse);
+      
+      print('[API PUT FormData Response] ${response.statusCode}');
       
       return _handleResponse(response);
     } on SocketException {

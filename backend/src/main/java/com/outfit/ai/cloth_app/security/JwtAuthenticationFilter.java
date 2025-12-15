@@ -80,6 +80,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     // 현재 유저 ID 받기
+    @SuppressWarnings("unused")
     private UUID getCurrentUserId() throws AccessDeniedException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 

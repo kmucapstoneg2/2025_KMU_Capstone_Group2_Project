@@ -8,11 +8,13 @@ import '../../../core/theme/theme.dart';
 class ScheduleList extends StatelessWidget {
   final List<Map<String, dynamic>> schedules;
   final Function(int) onDelete;
+  final Function(Map<String, dynamic>)? onRecommendOutfit;
 
   const ScheduleList({
     super.key,
     required this.schedules,
     required this.onDelete,
+    this.onRecommendOutfit,
   });
 
   @override
@@ -77,12 +79,54 @@ class ScheduleList extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              title,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          if (onRecommendOutfit != null)
+                            CupertinoButton(
+                              padding: EdgeInsets.zero,
+                              minSize: 30,
+                              onPressed: () => onRecommendOutfit!(schedule),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      CupertinoIcons.sparkles,
+                                      size: 12,
+                                      color: AppColors.primary,
+                                    ),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      '코디추천',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                       if (time != null || location != null) ...[
                         const SizedBox(height: 4),

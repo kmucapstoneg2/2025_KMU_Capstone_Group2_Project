@@ -46,16 +46,24 @@ class _ClosetDetailPageState extends State<ClosetDetailPage> {
   @override
   void initState() {
     super.initState();
-    nameController = TextEditingController(text: widget.item["name"]);
+    // ClothesItem.toMap()에서 사용하는 필드명에 맞춰 수정
+    nameController = TextEditingController(text: widget.item["name"] ?? "");
     linkController = TextEditingController(
       text: widget.item["purchase_link"] ?? "",
     );
 
+    // 기존 값을 제대로 가져오기
     selectedSeason = widget.item["season_name"];
     selectedStyle = widget.item["style_name"];
-    selectedType = widget.item["type_name"];
+    selectedType = widget.item["item_type_name"]; // type_name -> item_type_name
     selectedColor = widget.item["color_name"];
     selectedMaterial = widget.item["material_name"];
+
+    print('[ClosetDetailPage] initState - selectedSeason: $selectedSeason');
+    print('[ClosetDetailPage] initState - selectedStyle: $selectedStyle');
+    print('[ClosetDetailPage] initState - selectedType: $selectedType');
+    print('[ClosetDetailPage] initState - selectedColor: $selectedColor');
+    print('[ClosetDetailPage] initState - selectedMaterial: $selectedMaterial');
 
     _loadLikeStatus();
   }
@@ -134,48 +142,50 @@ class _ClosetDetailPageState extends State<ClosetDetailPage> {
         updates['purchase_link'] = linkController.text.trim();
       }
 
-      if (newImage != null) {
-        updates['image_url'] = newImage!.path;
-      }
-
       if (selectedSeason != null) {
-        updates['season_id'] = ClosetLogic.findCodeId(
-          provider.seasons,
-          selectedSeason!,
-          'season',
-        );
+        updates['seasonName'] = selectedSeason;
       }
       if (selectedStyle != null) {
-        updates['style_id'] = ClosetLogic.findCodeId(
-          provider.styles,
-          selectedStyle!,
-          'style',
-        );
+        updates['styleName'] = selectedStyle;
       }
       if (selectedType != null) {
-        updates['type_id'] = ClosetLogic.findCodeId(
-          provider.types,
-          selectedType!,
-          'type',
-        );
+        updates['itemTypeName'] = selectedType;
       }
       if (selectedColor != null) {
-        updates['color_id'] = ClosetLogic.findCodeId(
-          provider.colors,
-          selectedColor!,
-          'color',
-        );
+        updates['colorName'] = selectedColor;
       }
       if (selectedMaterial != null) {
-        updates['material_id'] = ClosetLogic.findCodeId(
-          provider.materials,
-          selectedMaterial!,
-          'material',
-        );
+        updates['materialName'] = selectedMaterial;
       }
 
-      await ClosetLogic.updateCloth(widget.item['cloth_id'], updates);
-      final token = context.read<AuthProvider>().accessToken ?? '';
+      final token = context.read<AuthProvider>().accessToken;
+      if (token == null) {
+        throw Exception('로그인이 필요합니다');
+      }
+
+      // 이미지가 변경된 경우 새 옷으로 등록하고 기존 옷 삭제
+      if (newImage != null) {
+        print('[ClosetDetailPage] 이미지 변경됨 - 새 옷 등록 및 기존 옷 삭제');
+        await ClosetLogic.addCloth(
+          token: token,
+          categoryName: widget.item['category_name'],
+          colorName: selectedColor ?? widget.item['color_name'],
+          materialName: selectedMaterial ?? widget.item['material_name'],
+          name: nameController.text.trim(),
+          seasonName: selectedSeason,
+          styleName: selectedStyle,
+          itemTypeName: selectedType,
+          imageFile: File(newImage!.path),
+        );
+        await ClosetLogic.deleteCloth(token: token, clothId: widget.item['cloth_id']);
+      } else {
+        // 이미지 변경 없이 데이터만 수정
+        await ClosetLogic.updateCloth(
+          token: token,
+          clothId: widget.item['cloth_id'],
+          updates: updates,
+        );
+      }
       await provider.loadClothes(token);
 
       if (mounted) {
@@ -206,8 +216,17 @@ class _ClosetDetailPageState extends State<ClosetDetailPage> {
     DialogHelper.showLoading(context);
 
     try {
-      await ClosetLogic.deleteCloth(widget.item['cloth_id']);
-      final token = context.read<AuthProvider>().accessToken ?? '';
+      final token = context.read<AuthProvider>().accessToken;
+      if (token == null) {
+        throw Exception('로그인이 필요합니다');
+      }
+
+      await ClosetLogic.deleteCloth(
+        token: token,
+        clothId: widget.item['cloth_id'],
+      );
+      
+      // 옷장 목록 새로고침
       await context.read<ClosetProvider>().loadClothes(token);
 
       if (mounted) {
@@ -362,45 +381,55 @@ class _ClosetDetailPageState extends State<ClosetDetailPage> {
 
                   ChipSection(
                     title: "계절",
-                    items: provider.seasons
-                        .map((s) => s['season_name'] as String)
-                        .toList(),
+                    items: provider.seasons.isEmpty
+                        ? ['봄', '여름', '가을', '겨울', '사계절']
+                        : provider.seasons
+                            .map((s) => s['season_name'] as String)
+                            .toList(),
                     selectedValue: selectedSeason,
                     onSelect: (v) => setState(() => selectedSeason = v),
                   ),
 
                   ChipSection(
                     title: "스타일",
-                    items: provider.styles
-                        .map((s) => s['style_name'] as String)
-                        .toList(),
+                    items: provider.styles.isEmpty
+                        ? ['캐쥬얼', '포멀', '스트릿', '모던', '클래식', '스포츠']
+                        : provider.styles
+                            .map((s) => s['style_name'] as String)
+                            .toList(),
                     selectedValue: selectedStyle,
                     onSelect: (v) => setState(() => selectedStyle = v),
                   ),
 
                   ChipSection(
                     title: "옷 종류",
-                    items: provider.types
-                        .map((t) => t['type_name'] as String)
-                        .toList(),
+                    items: provider.types.isEmpty
+                        ? ['셔츠', '티셔츠', '맨투맨', '후드티', '니트', '드레스', '원피스', '치마', '반바지', '청바지', '자켓', '코트', '운동화']
+                        : provider.types
+                            .map((t) => t['type_name'] as String)
+                            .toList(),
                     selectedValue: selectedType,
                     onSelect: (v) => setState(() => selectedType = v),
                   ),
 
                   ChipSection(
                     title: "색상",
-                    items: provider.colors
-                        .map((c) => c['color_name'] as String)
-                        .toList(),
+                    items: provider.colors.isEmpty
+                        ? ['화이트', '블랙', '블루', '네이비', '그레이', '브라운', '레드', '핑크']
+                        : provider.colors
+                            .map((c) => c['color_name'] as String)
+                            .toList(),
                     selectedValue: selectedColor,
                     onSelect: (v) => setState(() => selectedColor = v),
                   ),
 
                   ChipSection(
                     title: "재질",
-                    items: provider.materials
-                        .map((m) => m['material_name'] as String)
-                        .toList(),
+                    items: provider.materials.isEmpty
+                        ? ['면', '니트', '데님', '가죽', '비스코스', '울', '나일론', '폴리에스터르']
+                        : provider.materials
+                            .map((m) => m['material_name'] as String)
+                            .toList(),
                     selectedValue: selectedMaterial,
                     onSelect: (v) => setState(() => selectedMaterial = v),
                   ),
@@ -460,21 +489,46 @@ class _ClosetDetailPageState extends State<ClosetDetailPage> {
 
     final imageUrl = widget.item['image_url'] as String?;
     if (imageUrl != null && imageUrl.isNotEmpty) {
-      return Image.file(
-        File(imageUrl),
-        width: double.infinity,
-        height: double.infinity,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return const Center(
-            child: Icon(
-              CupertinoIcons.photo,
-              size: 60,
-              color: AppColors.textSecondary,
-            ),
-          );
-        },
-      );
+      // HTTP/HTTPS URL이면 네트워크 이미지, 아니면 로컬 파일
+      if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+        return Image.network(
+          imageUrl,
+          width: double.infinity,
+          height: double.infinity,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return const Center(
+              child: Icon(
+                CupertinoIcons.photo,
+                size: 60,
+                color: AppColors.textSecondary,
+              ),
+            );
+          },
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return const Center(
+              child: CupertinoActivityIndicator(),
+            );
+          },
+        );
+      } else {
+        return Image.file(
+          File(imageUrl),
+          width: double.infinity,
+          height: double.infinity,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return const Center(
+              child: Icon(
+                CupertinoIcons.photo,
+                size: 60,
+                color: AppColors.textSecondary,
+              ),
+            );
+          },
+        );
+      }
     }
 
     return const Center(

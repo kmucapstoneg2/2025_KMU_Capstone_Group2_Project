@@ -19,6 +19,41 @@ class ClosetItemCard extends StatelessWidget {
     this.onTap,
   });
 
+  /// 이미지 URL이 http/https면 네트워크 이미지, 아니면 로컬 파일
+  Widget _buildImage(String imageUrl) {
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return const Icon(
+            CupertinoIcons.photo,
+            size: 40,
+            color: AppColors.textSecondary,
+          );
+        },
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return const Center(
+            child: CupertinoActivityIndicator(),
+          );
+        },
+      );
+    } else {
+      return Image.file(
+        File(imageUrl),
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return const Icon(
+            CupertinoIcons.photo,
+            size: 40,
+            color: AppColors.textSecondary,
+          );
+        },
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final imageUrl = item['image_url'] as String?;
@@ -50,17 +85,7 @@ class ClosetItemCard extends StatelessWidget {
                 width: double.infinity,
                 color: AppColors.greyLight,
                 child: imageUrl != null && imageUrl.isNotEmpty
-                    ? Image.file(
-                        File(imageUrl),
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Icon(
-                            CupertinoIcons.photo,
-                            size: 40,
-                            color: AppColors.textSecondary,
-                          );
-                        },
-                      )
+                    ? _buildImage(imageUrl)
                     : const Icon(
                         CupertinoIcons.photo,
                         size: 40,

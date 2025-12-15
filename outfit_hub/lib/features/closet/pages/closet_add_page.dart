@@ -39,6 +39,20 @@ class _ClosetAddPageState extends State<ClosetAddPage> {
   String? selectedMaterial;
 
   @override
+  void initState() {
+    super.initState();
+    // 코드 테이블 데이터 로드 확인
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = context.read<ClosetProvider>();
+      print('[ClosetAddPage] initState - categories: ${provider.categories.length}');
+      if (provider.categories.isEmpty) {
+        print('[ClosetAddPage] 코드 테이블이 비어있음, 로드 시도...');
+        provider.loadCodeTables(token: '');
+      }
+    });
+  }
+
+  @override
   void dispose() {
     nameController.dispose();
     linkController.dispose();
@@ -200,54 +214,66 @@ class _ClosetAddPageState extends State<ClosetAddPage> {
 
                                     ChipSection(
                     title: "카테고리",
-                    items: provider.categories
-                        .map((c) => c['category_name'] as String)
-                        .toList(),
+                    items: provider.categories.isEmpty
+                        ? ['상의', '하의', '신발', '아우터'] // fallback
+                        : provider.categories
+                            .map((c) => c['category_name'] as String)
+                            .toList(),
                     selectedValue: selectedCategory,
                     onSelect: (v) => setState(() => selectedCategory = v),
                   ),
 
                   ChipSection(
                     title: "계절",
-                    items: provider.seasons
-                        .map((s) => s['season_name'] as String)
-                        .toList(),
+                    items: provider.seasons.isEmpty
+                        ? ['봄', '여름', '가을', '겨울', '사계절'] // fallback
+                        : provider.seasons
+                            .map((s) => s['season_name'] as String)
+                            .toList(),
                     selectedValue: selectedSeason,
                     onSelect: (v) => setState(() => selectedSeason = v),
                   ),
 
                   ChipSection(
                     title: "스타일",
-                    items: provider.styles
-                        .map((s) => s['style_name'] as String)
-                        .toList(),
+                    items: provider.styles.isEmpty
+                        ? ['캐쥬얼', '포멀', '스트릿', '모던', '클래식', '스포츠'] // fallback
+                        : provider.styles
+                            .map((s) => s['style_name'] as String)
+                            .toList(),
                     selectedValue: selectedStyle,
                     onSelect: (v) => setState(() => selectedStyle = v),
                   ),
 
                   ChipSection(
                     title: "옷 종류",
-                    items: provider.types
-                        .map((t) => t['type_name'] as String)
-                        .toList(),
+                    items: provider.types.isEmpty
+                        ? ['셔츠', '티셔츠', '맨투맨', '후드티', '니트', '드레스', '원피스', '치마', '반바지', '청바지', '자켓', '코트', '운동화'] // fallback
+                        : provider.types
+                            .map((t) => t['type_name'] as String)
+                            .toList(),
                     selectedValue: selectedType,
                     onSelect: (v) => setState(() => selectedType = v),
                   ),
 
                   ChipSection(
                     title: "색상",
-                    items: provider.colors
-                        .map((c) => c['color_name'] as String)
-                        .toList(),
+                    items: provider.colors.isEmpty
+                        ? ['화이트', '블랙', '블루', '네이비', '그레이', '브라운', '레드', '핑크'] // fallback
+                        : provider.colors
+                            .map((c) => c['color_name'] as String)
+                            .toList(),
                     selectedValue: selectedColor,
                     onSelect: (v) => setState(() => selectedColor = v),
                   ),
 
                   ChipSection(
                     title: "재질",
-                    items: provider.materials
-                        .map((m) => m['material_name'] as String)
-                        .toList(),
+                    items: provider.materials.isEmpty
+                        ? ['면', '니트', '데님', '가죽', '비스코스', '울', '나일론', '폴리에스터르'] // fallback
+                        : provider.materials
+                            .map((m) => m['material_name'] as String)
+                            .toList(),
                     selectedValue: selectedMaterial,
                     onSelect: (v) => setState(() => selectedMaterial = v),
                   ),

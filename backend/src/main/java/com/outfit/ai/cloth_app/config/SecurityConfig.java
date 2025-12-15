@@ -72,6 +72,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // API와 OAuth 경로 모두 허용
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/codes/**").permitAll()  // 코드 테이블 API 공개
                         .requestMatchers("/", "/auth/**", "/oauth2/**", "/login/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/weather").permitAll()  // 날씨 API 허용

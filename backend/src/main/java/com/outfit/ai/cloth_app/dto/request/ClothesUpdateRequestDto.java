@@ -1,29 +1,20 @@
-package com.outfit.ai.cloth_app.dto.response;
+package com.outfit.ai.cloth_app.dto.request;
 
-import java.time.OffsetDateTime;
-import java.util.UUID;
-
-// 옷 정보 응답 DTO
-public class ClothesItemDto {
-    private UUID clothID;
+/**
+ * 옷 정보 수정 요청 DTO (선택 필드만 업데이트)
+ */
+public class ClothesUpdateRequestDto {
     private String name;
-    private String imageUrl;
     private String categoryName;
     private String colorName;
     private String materialName;
     private String styleName;
     private String seasonName;
     private String itemTypeName;
-    private OffsetDateTime createdAt;
-
-    public UUID getClothID() { return clothID; }
-    public void setClothID(UUID clothID) { this.clothID = clothID; }
+    private String imageUrl; // 이미지 교체 시 사용 (이미지 업로드 별도 처리 필요 시 확장)
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
-
-    public String getImageUrl() { return imageUrl; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
     public String getCategoryName() { return categoryName; }
     public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
@@ -43,6 +34,6 @@ public class ClothesItemDto {
     public String getItemTypeName() { return itemTypeName; }
     public void setItemTypeName(String itemTypeName) { this.itemTypeName = itemTypeName; }
 
-    public OffsetDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 }

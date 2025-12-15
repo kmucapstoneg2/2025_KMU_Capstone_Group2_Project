@@ -247,7 +247,8 @@ class _ClosetPageState extends State<ClosetPage> {
             );
 
             if (result == true && mounted) {
-              context.read<ClosetProvider>().loadLocalClothes();
+              final token = context.read<AuthProvider>().accessToken ?? '';
+              context.read<ClosetProvider>().loadClothes(token);
             }
           },
         );

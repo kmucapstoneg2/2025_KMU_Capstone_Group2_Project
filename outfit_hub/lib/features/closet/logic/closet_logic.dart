@@ -4,11 +4,11 @@ import '../../../core/error/exceptions.dart';
 import '../../../core/services/clothes_service.dart';
 
 /// ============================================
-/// 옷장 비즈니스 로직
+/// 옷장 비즈니스 로직 (백엔드 API 기반)
 /// ============================================
 
 class ClosetLogic {
-  /// 옷 추가 (Backend API 사용)
+  /// 옷 추가 (Backend API)
   static Future<void> addCloth({
     required String token,
     required String categoryName,
@@ -45,28 +45,39 @@ class ClosetLogic {
     }
   }
 
-  /// 옷 수정
-  static Future<void> updateCloth(
-    String clothId,
-    Map<String, dynamic> updates,
-  ) async {
+  /// 옷 수정 (Backend API)
+  static Future<void> updateCloth({
+    required String token,
+    required String clothId,
+    required Map<String, dynamic> updates,
+  }) async {
     try {
-      await Storage.updateCloth(clothId, updates);
+      await ClothesService.updateClothes(
+        token: token,
+        clothId: clothId,
+        data: updates,
+      );
     } catch (e) {
-      throw StorageException('옷 수정에 실패했습니다');
+      rethrow;
     }
   }
 
-  /// 옷 삭제
-  static Future<void> deleteCloth(String clothId) async {
+  /// 옷 삭제 (Backend API)
+  static Future<void> deleteCloth({
+    required String token,
+    required String clothId,
+  }) async {
     try {
-      await Storage.deleteCloth(clothId);
+      await ClothesService.deleteClothes(
+        token: token,
+        clothId: clothId,
+      );
     } catch (e) {
-      throw StorageException('옷 삭제에 실패했습니다');
+      rethrow;
     }
   }
 
-  /// 위시리스트 토글
+  /// 위시리스트 토글 (로컬 DB - 임시)
   static Future<bool> toggleWishlist(String clothId) async {
     try {
       final isLiked = await Storage.isItemLiked(clothId);
@@ -83,7 +94,7 @@ class ClosetLogic {
     }
   }
 
-  /// 위시리스트 여부 확인
+  /// 위시리스트 여부 확인 (로컬 DB - 임시)
   static Future<bool> isLiked(String clothId) async {
     try {
       return await Storage.isItemLiked(clothId);

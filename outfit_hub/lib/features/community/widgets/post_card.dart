@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import '../../../core/theme/theme.dart';
 import '../../../core/utils/date_helper.dart';
+import '../../message/pages/message_thread_page.dart';
 
 /// ============================================
 /// 게시물 카드
@@ -174,6 +175,32 @@ class PostCard extends StatelessWidget {
                     child: const Icon(
                       CupertinoIcons.chat_bubble,
                       color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const Spacer(),
+                  // 쪽지 보내기 버튼
+                  Builder(
+                    builder: (context) => CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () {
+                        final userId = post['user_id']?.toString() ?? '';
+                        final userName = post['user_name']?.toString() ?? '사용자';
+                        
+                        Navigator.push(
+                          context,
+                          CupertinoPageRoute(
+                            builder: (context) => MessageThreadPage(
+                              userId: userId,
+                              userName: userName,
+                            ),
+                          ),
+                        );
+                      },
+                      child: const Icon(
+                        CupertinoIcons.envelope,
+                        color: AppColors.textPrimary,
+                        size: 22,
+                      ),
                     ),
                   ),
                 ],

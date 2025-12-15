@@ -7,7 +7,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
 import '../../../providers/notification_provider.dart';
-import '../services/websocket_service.dart';
 import '../views/notification_list_view.dart';
 
 /// 알림 아이콘 버튼 (배지 포함) - Cupertino 스타일
@@ -86,20 +85,22 @@ class _NotificationBadge extends StatelessWidget {
   }
 }
 
-/// 테스트용 알림 추가 버튼
-class TestNotificationButton extends StatelessWidget {
-  const TestNotificationButton({super.key});
+/// 알림 새로고침 버튼
+class RefreshNotificationButton extends StatelessWidget {
+  const RefreshNotificationButton({super.key});
 
   @override
   Widget build(BuildContext context) {
     return CupertinoButton(
       padding: EdgeInsets.zero,
-      onPressed: () {
-        context.read<NotificationProvider>().addDummyNotification();
-        _showToast(context, '테스트 알림이 추가되었습니다');
+      onPressed: () async {
+        await context.read<NotificationProvider>().refresh();
+        if (context.mounted) {
+          _showToast(context, '알림을 새로고침했습니다');
+        }
       },
       child: const Icon(
-        CupertinoIcons.add_circled,
+        CupertinoIcons.refresh,
         size: 24,
       ),
     );
@@ -144,26 +145,12 @@ class CupertinoConnectionIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<NotificationProvider>(
       builder: (context, provider, child) {
-        Color color;
-
-        switch (provider.connectionState) {
-          case WebSocketConnectionState.connected:
-            color = CupertinoColors.systemGreen;
-            break;
-          case WebSocketConnectionState.connecting:
-          case WebSocketConnectionState.reconnecting:
-            color = CupertinoColors.systemOrange;
-            break;
-          case WebSocketConnectionState.disconnected:
-            color = CupertinoColors.systemRed;
-            break;
-        }
-
+        // REST API 사용으로 연결 상태 표시 제거
         return Container(
           width: 8,
           height: 8,
-          decoration: BoxDecoration(
-            color: color,
+          decoration: const BoxDecoration(
+            color: CupertinoColors.activeGreen,
             shape: BoxShape.circle,
           ),
         );
