@@ -1,6 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'dart:io';
 import '../../../core/theme/theme.dart';
 
 class OutfitRecommendCard extends StatelessWidget {
@@ -43,17 +44,7 @@ class OutfitRecommendCard extends StatelessWidget {
                         borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(12),
                         ),
-                        child: Image.file(
-                          File(imageUrl),
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return const Icon(
-                              CupertinoIcons.photo,
-                              color: AppColors.textSecondary,
-                            );
-                          },
-                        ),
+                        child: _buildImage(imageUrl),
                       )
                     : const Icon(
                         CupertinoIcons.photo,
@@ -89,6 +80,34 @@ class OutfitRecommendCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildImage(String url) {
+    if (url.startsWith('http')) {
+      return Image.network(
+        url,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return const Icon(
+            CupertinoIcons.photo,
+            color: AppColors.textSecondary,
+          );
+        },
+      );
+    }
+
+    return Image.file(
+      File(url),
+      width: double.infinity,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return const Icon(
+          CupertinoIcons.photo,
+          color: AppColors.textSecondary,
+        );
+      },
     );
   }
 }

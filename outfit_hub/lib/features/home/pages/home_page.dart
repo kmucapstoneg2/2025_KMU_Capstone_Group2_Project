@@ -11,6 +11,7 @@ import '../logic/logic.dart';
 import '../widgets/widgets.dart';
 import '../../virtual_fitting/pages/virtual_fitting_page.dart';
 import '../../notification/views/notification_list_view.dart';
+import '../../outfit/pages/outfit_result_page.dart';
 
 /// ============================================
 /// 홈 페이지
@@ -206,7 +207,12 @@ class _HomePageState extends State<HomePage> {
             icon: CupertinoIcons.sparkles,
             label: '코디 추천',
             onTap: () {
-              mainTabKey.currentState?.changeTab(2); // 캘린더 탭으로 이동
+              Navigator.push(
+                context,
+                CupertinoPageRoute(
+                  builder: (_) => const OutfitResultPage(),
+                ),
+              );
             },
           ),
         ),

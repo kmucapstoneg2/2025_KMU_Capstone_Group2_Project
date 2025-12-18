@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 /// ============================================
 /// 코디 추천 서비스
 /// ============================================
@@ -11,6 +14,7 @@ class RecommendationService {
     required String time,
     required String location,
     required List<String> tags,
+    required String token,
   }) async {
     try {
       print('[RecommendationService] getOutfitRecommendation called');
@@ -24,15 +28,16 @@ class RecommendationService {
           'location': location,
           'tags': tags,
         },
+        token: token,
       );
 
       print('[RecommendationService] Raw response: $response');
 
-      final data = response['data'];
-      
+      final data = response['data'] as Map<String, dynamic>? ?? {};
+
       return {
         'success': response['success'] ?? true,
-        'data': data ?? response,
+        'data': data,
       };
     } catch (e) {
       print('[RecommendationService] Error: $e');
@@ -43,26 +48,30 @@ class RecommendationService {
   /// 가상 피팅 이미지 생성
   static Future<Map<String, dynamic>> generateVirtualFitting({
     required List<String> clothIds,
-    required dynamic userImage,
+    required File userImage,
+    required String token,
   }) async {
     try {
       print('[RecommendationService] generateVirtualFitting called with clothIds: $clothIds');
 
-      // TODO: userImage를 multipart로 전송 구현 필요
-      // 현재는 cloth_ids만 전송
-      final response = await ApiService.post(
+      final response = await ApiService.postMultipartFormData(
         '/outfits/virtual-fitting',
-        {
-          'cloth_ids': clothIds,
-          // 'user_image': userImage, // 백엔드에서 multipart 구현 후 추가
+        data: {
+          'cloth_ids': jsonEncode(clothIds),
         },
+        file: userImage,
+        fileFieldName: 'image',
+        token: token,
       );
 
       print('[RecommendationService] Virtual fitting response: $response');
 
+      final data = response['data'] as Map<String, dynamic>? ?? {};
+
       return {
         'success': response['success'] ?? true,
-        'imageUrl': response['data']?['image_url'] ?? response['data']?['imageUrl'] ?? '',
+        'imageUrl': data['image_url'] ?? data['imageUrl'] ?? '',
+        'outfitId': data['outfit_id'] ?? data['outfitId'],
       };
     } catch (e) {
       print('[RecommendationService] Error: $e');
@@ -75,6 +84,7 @@ class RecommendationService {
     required String imageUrl,
     required String description,
     required List<String> tags,
+    required String token,
   }) async {
     try {
       print('[RecommendationService] uploadOutfitToCommunity called');
@@ -86,6 +96,7 @@ class RecommendationService {
           'description': description,
           'tags': tags,
         },
+        token: token,
       );
 
       print('[RecommendationService] Upload response: $response');

@@ -2,6 +2,8 @@
 /// 코디 추천 비즈니스 로직
 /// ============================================
 
+import 'dart:io';
+
 import '../../../core/services/recommendation_service.dart';
 
 class RecommendationLogic {
@@ -11,6 +13,7 @@ class RecommendationLogic {
     required String time,
     required String location,
     required List<String> tags,
+    required String token,
   }) async {
     try {
       final result = await RecommendationService.getOutfitRecommendation(
@@ -18,6 +21,7 @@ class RecommendationLogic {
         time: time,
         location: location,
         tags: tags,
+        token: token,
       );
 
       if (result['success'] == true) {
@@ -32,10 +36,17 @@ class RecommendationLogic {
   }
 
   /// 가상 피팅 생성
-  static Future<String> generateVirtualFitting(List<String> clothIds) async {
+  static Future<String> generateVirtualFitting({
+    required List<String> clothIds,
+    required File userImage,
+    required String token,
+  }) async {
     try {
       final result = await RecommendationService.generateVirtualFitting(
-        clothIds: clothIds,        userImage: null,      );
+        clothIds: clothIds,
+        userImage: userImage,
+        token: token,
+      );
 
       if (result['success'] == true) {
         return result['imageUrl'] as String;
@@ -53,12 +64,14 @@ class RecommendationLogic {
     required String imageUrl,
     required String description,
     required List<String> tags,
+    required String token,
   }) async {
     try {
       final result = await RecommendationService.uploadOutfitToCommunity(
         imageUrl: imageUrl,
         description: description,
         tags: tags,
+        token: token,
       );
 
       if (result['success'] == true) {

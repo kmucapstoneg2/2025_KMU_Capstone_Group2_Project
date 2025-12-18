@@ -26,28 +26,30 @@ public class OutfitRecommendationController {
 
     // 이전 코디 추천 API - 이미지를 업로드하여 AI 추천을 받음
     @PostMapping(value = "/recommend/outfit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Mono<ResponseEntity<String>> recommendOutfit(
+    public Mono<ResponseEntity<Map<String, Object>>> recommendOutfit(
             @RequestHeader("Authorization") String authorizationHeader,
-            @RequestPart("image") MultipartFile image) {
+            @RequestPart("image") MultipartFile image,
+            @RequestPart(value = "cloth_ids", required = false) List<String> clothIds) {
 
-        if(image.isEmpty()) {
-            return Mono.just(ResponseEntity.badRequest().body("\"error\": \"Image file is missing.\"}"));
+        if (image.isEmpty()) {
+            return Mono.just(ResponseEntity.badRequest().body(Map.of("success", false, "error", "Image file is missing.")));
         }
 
         try {
             UUID userId = authService.getUserIdFromAuthHeader(authorizationHeader);
+            List<UUID> parsedClothIds = parseClothIds(clothIds);
 
-            return recommendationService.requestAndSaveRecommendation(userId, image)
-                    .map(ResponseEntity::ok)
+            return recommendationService.requestAndSaveRecommendation(userId, image, parsedClothIds)
+                    .map(data -> ResponseEntity.ok(Map.of("success", true, "data", data)))
                     .onErrorResume(e -> {
                         System.err.println("Service Error during recommendation: " + e.getMessage());
-                        return Mono.just(ResponseEntity.internalServerError().body("{\"error\": \"Server processing error occurred: " + e.getMessage() + "\"}"));
+                        return Mono.just(ResponseEntity.internalServerError().body(Map.of("success", false, "error", e.getMessage())));
                     });
         } catch (IllegalArgumentException e) {
-            return Mono.just(ResponseEntity.status(401).body("{\"error\": \"Authentication failed or invalid user ID.\"}"));
+            return Mono.just(ResponseEntity.status(401).body(Map.of("success", false, "error", "Authentication failed or invalid user ID.")));
         } catch (Exception e) {
-            System.err.println("Unexpected Error in Controller");
-            return Mono.just(ResponseEntity.internalServerError().body("{\"error\": \"An unexpected error occurred.\"}"));
+            System.err.println("Unexpected Error in Controller" + e.getMessage());
+            return Mono.just(ResponseEntity.internalServerError().body(Map.of("success", false, "error", "An unexpected error occurred.")));
         }
     }
 
@@ -57,28 +59,17 @@ public class OutfitRecommendationController {
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody Map<String, Object> request) {
         try {
-            // 인증 검증
-            authService.getUserIdFromAuthHeader(authorizationHeader);
+            UUID userId = authService.getUserIdFromAuthHeader(authorizationHeader);
 
-            // 요청 데이터 추출 (향후 구현에서 사용)
-            @SuppressWarnings("unused")
             String date = (String) request.get("date");
-            @SuppressWarnings("unused")
             String time = (String) request.get("time");
-            String location = (String) request.get("location");
-            @SuppressWarnings({"unchecked", "unused"})
-            List<String> tags = (List<String>) request.get("tags");
+            String location = (String) request.getOrDefault("location", "");
+            @SuppressWarnings("unchecked")
+            List<String> tags = (List<String>) request.getOrDefault("tags", List.of());
 
-            // 임시 응답 - 실제 구현 필요
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("data", Map.of(
-                    "recommended_items", Arrays.asList(
-                            Map.of("name", "추천 의류 1", "category", "상의"),
-                            Map.of("name", "추천 의류 2", "category", "하의")
-                    ),
-                    "reason", String.format("%s에서 열리는 행사에 어울리는 캐주얼 스타일 코디입니다.", location)
-            ));
+            Map<String, Object> response = recommendationService.recommendBySchedule(userId, location, tags);
+            response.put("requested_date", date);
+            response.put("requested_time", time);
 
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
@@ -89,36 +80,28 @@ public class OutfitRecommendationController {
     }
 
     // 가상 피팅 이미지 생성 API
-    @PostMapping("/outfits/virtual-fitting")
-    public ResponseEntity<?> generateVirtualFitting(
+    @PostMapping(value = "/outfits/virtual-fitting", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Mono<ResponseEntity<Map<String, Object>>> generateVirtualFitting(
             @RequestHeader("Authorization") String authorizationHeader,
-            @RequestBody Map<String, Object> request) {
+            @RequestPart("image") MultipartFile image,
+            @RequestPart(value = "cloth_ids", required = false) List<String> clothIds) {
         try {
-            // 인증 검증
-            authService.getUserIdFromAuthHeader(authorizationHeader);
+            UUID userId = authService.getUserIdFromAuthHeader(authorizationHeader);
+            List<UUID> parsedClothIds = parseClothIds(clothIds);
 
-            @SuppressWarnings("unchecked")
-            List<String> clothIds = (List<String>) request.get("cloth_ids");
-
-            if (clothIds == null || clothIds.isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("success", false, "error", "No clothes selected"));
-            }
-
-            // 임시 응답 - 실제 AI 모델 호출 필요
-            String generatedImageUrl = "https://via.placeholder.com/500x600?text=Virtual+Fitting";
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("data", Map.of(
-                    "image_url", generatedImageUrl,
-                    "clothes_count", clothIds.size()
-            ));
-
-            return ResponseEntity.ok(response);
+            return recommendationService.requestAndSaveRecommendation(userId, image, parsedClothIds)
+                    .map(data -> ResponseEntity.ok(Map.of(
+                            "success", true,
+                            "data", data
+                    )))
+                    .onErrorResume(e -> Mono.just(ResponseEntity.internalServerError().body(Map.of(
+                            "success", false,
+                            "error", e.getMessage()
+                    ))));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(401).body(Map.of("success", false, "error", "Authentication failed"));
+            return Mono.just(ResponseEntity.status(401).body(Map.of("success", false, "error", "Authentication failed")));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(Map.of("success", false, "error", e.getMessage()));
+            return Mono.just(ResponseEntity.internalServerError().body(Map.of("success", false, "error", e.getMessage())));
         }
     }
 
@@ -158,5 +141,37 @@ public class OutfitRecommendationController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(Map.of("success", false, "error", e.getMessage()));
         }
+    }
+
+    private List<UUID> parseClothIds(List<String> clothIds) {
+        if (clothIds == null) {
+            return Collections.emptyList();
+        }
+
+        List<UUID> parsed = new ArrayList<>();
+        for (String id : clothIds) {
+            try {
+                if (id != null && id.trim().startsWith("[")) {
+                    List<String> jsonIds = Arrays.asList(id
+                            .replace("[", "")
+                            .replace("]", "")
+                            .replace("\"", "")
+                            .split(","));
+                    jsonIds.stream()
+                            .map(String::trim)
+                            .filter(s -> !s.isEmpty())
+                            .forEach(item -> {
+                                try {
+                                    parsed.add(UUID.fromString(item));
+                                } catch (Exception ignoredInner) {
+                                }
+                            });
+                    continue;
+                }
+                parsed.add(UUID.fromString(id));
+            } catch (Exception ignored) {
+            }
+        }
+        return parsed;
     }
 }

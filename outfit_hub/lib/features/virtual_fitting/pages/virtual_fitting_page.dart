@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/theme.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../../core/error/error_handler.dart';
 import '../../../core/utils/dialog_helper.dart';
+import '../../../providers/auth_provider.dart';
 import '../../../providers/closet_provider.dart';
 import '../logic/virtual_fitting_logic.dart';
 
@@ -21,6 +25,8 @@ class VirtualFittingPage extends StatefulWidget {
 class _VirtualFittingPageState extends State<VirtualFittingPage> {
   List<Map<String, dynamic>> selectedClothes = [];
   bool isLoading = false;
+  File? _userImageFile;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   Widget build(BuildContext context) {
@@ -126,6 +132,37 @@ class _VirtualFittingPageState extends State<VirtualFittingPage> {
                                 ),
                               ),
                               const SizedBox(height: AppSpacing.lg),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: CupertinoButton(
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                      color: AppColors.greyLight,
+                                      onPressed: isLoading ? null : _pickUserImage,
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: const [
+                                          Icon(CupertinoIcons.photo_on_rectangle),
+                                          SizedBox(width: 8),
+                                          Text('내 사진 선택'),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: AppSpacing.md),
+                                  if (_userImageFile != null)
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: Image.file(
+                                        _userImageFile!,
+                                        width: 70,
+                                        height: 70,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: AppSpacing.md),
                               if (selectedClothes.isNotEmpty)
                                 Row(
                                   children: [
@@ -309,12 +346,23 @@ class _VirtualFittingPageState extends State<VirtualFittingPage> {
     );
   }
 
-  Future<void> _showVirtualFittingDialog() async {
-    // 사용자 사진 선택
-    // TODO: 이미지 선택 기능 구현
-    final userImageFile = null;
+  Future<void> _pickUserImage() async {
+    try {
+      final picked = await _picker.pickImage(source: ImageSource.gallery, maxWidth: 1080);
+      if (picked != null) {
+        setState(() {
+          _userImageFile = File(picked.path);
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        await ErrorHandler.showError(context, e);
+      }
+    }
+  }
 
-    if (userImageFile == null) {
+  Future<void> _showVirtualFittingDialog() async {
+    if (_userImageFile == null) {
       if (mounted) {
         await showCupertinoDialog(
           context: context,
@@ -345,7 +393,7 @@ class _VirtualFittingPageState extends State<VirtualFittingPage> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.file(
-                  userImageFile,
+                  _userImageFile!,
                   height: 120,
                   fit: BoxFit.cover,
                 ),
@@ -415,17 +463,26 @@ class _VirtualFittingPageState extends State<VirtualFittingPage> {
     );
 
     if (result == true) {
-      await _generateVirtualFitting(userImageFile);
+      await _generateVirtualFitting(_userImageFile!);
     }
   }
 
-  Future<void> _generateVirtualFitting(dynamic userImageFile) async {
+  Future<void> _generateVirtualFitting(File userImageFile) async {
     setState(() => isLoading = true);
 
     try {
+      final authProvider = context.read<AuthProvider>();
+      await authProvider.checkAndHandleToken();
+      final token = authProvider.accessToken;
+
+      if (token == null) {
+        throw Exception('로그인이 필요합니다. 다시 로그인 후 시도해주세요.');
+      }
+
       final imageUrl = await VirtualFittingLogic.generateFitting(
         selectedClothes,
         userImageFile: userImageFile,
+        token: token,
       );
 
       if (mounted) {
@@ -476,7 +533,7 @@ class _VirtualFittingPageState extends State<VirtualFittingPage> {
                 child: const Text('커뮤니티에 공유'),
                 onPressed: () async {
                   Navigator.pop(context);
-                  await _shareToCoordinator(imageUrl);
+                  await _shareToCoordinator(imageUrl, token);
                 },
               ),
             ],
@@ -492,7 +549,7 @@ class _VirtualFittingPageState extends State<VirtualFittingPage> {
     }
   }
 
-  Future<void> _shareToCoordinator(String imageUrl) async {
+  Future<void> _shareToCoordinator(String imageUrl, String token) async {
     final descriptionController = TextEditingController();
 
     final shouldShare = await showCupertinoDialog<bool>(
@@ -553,6 +610,7 @@ class _VirtualFittingPageState extends State<VirtualFittingPage> {
           imageUrl: imageUrl,
           description: descriptionController.text,
           tags: tags,
+          token: token,
         );
 
         if (mounted) {
@@ -565,6 +623,7 @@ class _VirtualFittingPageState extends State<VirtualFittingPage> {
           // 선택된 의류 초기화
           setState(() {
             selectedClothes.clear();
+            _userImageFile = null;
           });
         }
       } catch (e) {
